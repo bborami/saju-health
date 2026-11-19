@@ -186,7 +186,7 @@
   <div class="mode"><button class="on" data-m="me">🔮 내 사주 보기</button><button data-m="gh">💞 궁합 보기</button></div>
   <section class="card form" id="ghForm" style="display:none">
     <p class="relq">어떤 사이인가요?</p>
-    <div class="rel" id="rel"><button class="on" data-r="lover">💑 배우자·연인</button><button data-r="child">👨‍👩‍👧 부모·자녀</button><button data-r="friend">🤝 친구</button><button data-r="coworker">💼 직장동료</button><button data-r="partner">📈 사업파트너</button><button data-r="client">🙋 고객</button></div>
+    <div class="rel" id="rel"><button class="on" data-r="lover">💑 배우자·연인</button><button data-r="child">👨‍👩‍👧 부모·자녀</button><button data-r="sibling">👫 형제자매</button><button data-r="friend">🤝 친구</button><button data-r="coworker">💼 직장동료</button><button data-r="partner">📈 사업파트너</button><button data-r="client">🙋 고객</button></div>
     <div class="pcrole" id="pcRole" style="display:none"><span>나는</span><div class="seg" style="--sc:#e5487a"><button class="on" data-v="parent">부모</button><button data-v="child">자녀</button></div></div>
     <div id="ghP1"></div><div class="ghsep">💑</div><div id="ghP2"></div>
     <button class="go" id="ghGo">궁합 보기</button>
@@ -494,6 +494,7 @@ function tipList(G){
   const out=[], add=(lab,k)=>{ if(G.R.acts[k]&&!out.some(o=>o[1]===G.R.acts[k])) out.push([lab,G.R.acts[k]]); };
   if(r==='partner'||r==='coworker'){ add(A+':',G.ae); add(B+':',G.be); add('둘이 함께:',G.low); }
   else if(r==='child'){ const pc=G.R.o==='부모님'; add(A+' → '+B+(pc?'께:':'에게:'),G.be); add(pc?A+' → '+B+'께:':'둘이 함께:',G.low); }
+  else if(r==='sibling'){ add(A+' → '+B+'에게:',G.be); add('둘이 함께:',G.low); }
   else if(r==='client'){ add(A+' → '+B+'에게:',G.be); add(A+' → '+B+'에게:',G.low); }
   else { add('',G.ae); add('',G.be); add('',G.low); }
   return out;
@@ -502,6 +503,9 @@ const REL={
  lover:{label:'💑 배우자·연인',b:'나',o:'상대방',tiers:['💘 천생연분','💕 찰떡궁합','💗 좋은 인연','💛 노력하면 빛나는 사이'],act:'💌 추천 데이트',
   acts:{목:'숲길 산책이나 식물원 데이트',화:'공연, 축제처럼 신나는 데이트',토:'맛집 탐방과 집밥 데이트',금:'전시회, 쇼핑처럼 감각적인 데이트',수:'바다나 조용한 카페에서 깊은 대화 데이트'},
   ask:['두 사람의 성격 궁합과 서로 끌리는 점','갈등이 생기기 쉬운 부분과 해결 팁','결혼·연애 생활에서 잘 맞는 점','함께 챙기면 좋은 건강 습관','앞으로의 관계 흐름']},
+ sibling:{label:'👫 형제자매',b:'나',o:'형제',tiers:['🍀 하늘이 맺어준 형제','🤞 든든한 내 편','😊 정다운 형제','🌱 티격태격 정든 사이'],act:'🎁 형제끼리 가까워지는 팁',
+  acts:{목:'같이 운동하거나 새로운 것 배우기',화:'생일, 기념일 챙기며 신나게 축하하기',토:'명절, 가족 모임 함께 챙기기',금:'돈 문제와 약속은 깔끔하게 정리하기',수:'가끔 둘만의 긴 통화나 산책 수다'},
+  ask:['형제자매의 성격 궁합','어릴 때와 어른이 된 지금의 관계 흐름','서운해지기 쉬운 부분과 해결 팁','함께 챙기면 좋은 건강 습관','부모님을 함께 모실 때 역할 분담']},
  friend:{label:'🤝 친구',b:'나',o:'친구',tiers:['🫶 평생 단짝','✨ 찐친 케미','😊 좋은 친구','🌱 알아갈수록 좋은 사이'],act:'🎈 같이 하면 좋은 것',
   acts:{목:'등산, 캠핑 같은 야외 활동',화:'콘서트, 경기 관람처럼 신나는 활동',토:'맛집 투어와 집들이',금:'전시회, 쇼핑, 사진 찍기',수:'카페 수다와 여행'},
   ask:['두 사람의 성격 궁합과 잘 맞는 점','서운해지기 쉬운 부분과 오래가는 우정 팁','서로에게 도움이 되는 점','함께 하면 좋은 취미와 건강 습관','앞으로의 우정 흐름']},
@@ -523,28 +527,28 @@ const REL={
   ask:['부모와 자녀의 성격 궁합','아이의 타고난 성향과 잘 맞는 대화법','부딪히기 쉬운 부분과 해결 팁','아이에게 맞는 건강 습관','함께 성장하는 관계를 위한 팁']}
 };
 let relType='lover';
-const KW={ // [lover, friend, coworker, partner, client, child]
- hap:['#운명적끌림','#첫만남부터베프','#척하면척','#환상의케미','#첫인상호감','#천생가족'],
- same:['#찰떡공감','#취향일치','#말안해도통함','#같은방향','#코드일치','#붕어빵'],
- gen:['#서로성장','#든든한응원','#서로끌어주기','#윈윈','#믿고맡기는사이','#든든한버팀목'],
- ke:['#밀당','#자극제','#리더와서포터','#역할분담','#천천히신뢰','#서로배우기'],
- yukhap:['#편안함','#오래가는사이','#호흡척척','#생활리듬일치','#편안한대화','#포근한집'],
- samhap:['#팀워크','#함께라면','#시너지','#목표일치','#같은꿈','#한마음가족'],
- sameb:['#닮은꼴','#거울같은사이','#비슷한스타일','#비슷한계산법','#통하는취향','#판박이'],
- chung:['#티격태격','#지루할틈없음','#건강한토론','#다른시각','#새로운자극','#사춘기도OK'],
- wonjin:['#표현이필요해','#작은배려','#말한마디의힘','#확인또확인','#세심한관심','#사랑표현'],
- mu:['#존중','#편한사이','#깔끔한관계','#신뢰기반','#부담없는사이','#믿어주기'],
- fill:['#서로의빈자리','#서로채움','#보완관계','#부족함을채워','#딱필요한사람','#서로채움'],
- rel:['#설렘','#우정','#협업','#시너지','#신뢰','#가족']
+const KW={ // [lover, friend, coworker, partner, client, child, sibling]
+ hap:['#운명적끌림','#첫만남부터베프','#척하면척','#환상의케미','#첫인상호감','#천생가족','#피는물보다진하다'],
+ same:['#찰떡공감','#취향일치','#말안해도통함','#같은방향','#코드일치','#붕어빵','#복붙형제'],
+ gen:['#서로성장','#든든한응원','#서로끌어주기','#윈윈','#믿고맡기는사이','#든든한버팀목','#서로챙김'],
+ ke:['#밀당','#자극제','#리더와서포터','#역할분담','#천천히신뢰','#서로배우기','#형님먼저'],
+ yukhap:['#편안함','#오래가는사이','#호흡척척','#생활리듬일치','#편안한대화','#포근한집','#편한가족'],
+ samhap:['#팀워크','#함께라면','#시너지','#목표일치','#같은꿈','#한마음가족','#원팀'],
+ sameb:['#닮은꼴','#거울같은사이','#비슷한스타일','#비슷한계산법','#통하는취향','#판박이','#판박이'],
+ chung:['#티격태격','#지루할틈없음','#건강한토론','#다른시각','#새로운자극','#사춘기도OK','#티격태격'],
+ wonjin:['#표현이필요해','#작은배려','#말한마디의힘','#확인또확인','#세심한관심','#사랑표현','#한마디의다정'],
+ mu:['#존중','#편한사이','#깔끔한관계','#신뢰기반','#부담없는사이','#믿어주기','#적당한거리'],
+ fill:['#서로의빈자리','#서로채움','#보완관계','#부족함을채워','#딱필요한사람','#서로채움','#서로채움'],
+ rel:['#설렘','#우정','#협업','#시너지','#신뢰','#가족','#형제']
 };
-const RIDX={lover:0,friend:1,coworker:2,partner:3,client:4,child:5};
+const RIDX={lover:0,friend:1,coworker:2,partner:3,client:4,child:5,sibling:6};
 function gunghap(A,B){
   const a=toK(A.day), b=toK(B.day), an=A.nm||'나', bn=B.nm||'상대방';
   const as=STEM.indexOf(a[0]), bs=STEM.indexOf(b[0]), ae=STEME[as], be=STEME[bs];
   const out=[]; let sc=55;
   // 일간
   let c1,c2;
-  if(Math.abs(as-bs)===5){ c1='hap'; sc+=25; out.push({t:'💞 일간: 천간합',p:25,d:`두 사람의 일간(${a[0]}·${b[0]})이 서로 끌어당기는 '합' 관계예요. ${relType==='child'?'말하지 않아도 마음이 통하고, 함께 있으면 자연스럽게 하나가 되는 끈끈한 가족이에요.':'처음 만났을 때부터 묘하게 끌리고, 함께 있으면 자연스럽게 하나가 되는 환상의 조합이에요.'}`}); }
+  if(Math.abs(as-bs)===5){ c1='hap'; sc+=25; out.push({t:'💞 일간: 천간합',p:25,d:`두 사람의 일간(${a[0]}·${b[0]})이 서로 끌어당기는 '합' 관계예요. ${relType==='child'||relType==='sibling'?'말하지 않아도 마음이 통하고, 함께 있으면 자연스럽게 하나가 되는 끈끈한 가족이에요.':'처음 만났을 때부터 묘하게 끌리고, 함께 있으면 자연스럽게 하나가 되는 환상의 조합이에요.'}`}); }
   else if(ae===be){ c1='same'; sc+=12; out.push({t:'🤝 일간: 같은 기운',p:12,d:`둘 다 ${ELN[ae]}(${ae}) 기운이라 친구 같은 사이예요. 말하지 않아도 통하고 취향이 비슷해요. 다만 둘 다 고집을 부리면 한 사람이 먼저 양보해 주세요.`}); }
   else if(GEN[ae]===be||GEN[be]===ae){ c1='gen'; sc+=18; const [g,r,gn,rn]=GEN[ae]===be?[ae,be,an,bn]:[be,ae,bn,an];
     out.push({t:'🌱 일간: 상생',p:18,d:`${gn}님의 ${ELN[g]} 기운이 ${rn}님의 ${ELN[r]} 기운을 살려주는 '상생' 관계예요. ${gn}님이 챙겨주고 ${rn}님이 힘을 얻는, 서로를 성장시키는 조합이에요.`}); }
