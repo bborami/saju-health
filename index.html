@@ -389,7 +389,7 @@ function show(n, manse){
      <button class="aibtn copy" id="manseCopy">📋 만세력 복사하기</button>
      <div class="btns"><a class="aibtn gpt" id="gptBtn" target="_blank" rel="noopener">💬 ChatGPT로 묻기</a><a class="aibtn gem" id="gemBtn" href="https://gemini.google.com/app" target="_blank" rel="noopener">✨ Gemini로 묻기</a></div>
      <p class="saveMsg" id="aiMsg"></p>
-     <p class="aihint">Gemini는 창이 열리면 입력칸을 길게 눌러 <b>붙여넣기</b>만 하면 돼요. AI 답변은 참고용이에요.</p></section>`:'';
+     <p class="aihint">AI 답변은 참고용이에요.</p></section>`:'';
   $('#content').innerHTML=hero+top+gw+body+save+ai+ganjiGrid();
   if(mine){ const g=$('#gptBtn'); if(g) g.href='https://chatgpt.com/?q='+encodeURIComponent(aiPrompt()); }
   const b=$('#buddy');
