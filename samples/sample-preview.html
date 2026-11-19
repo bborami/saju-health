@@ -84,6 +84,11 @@
   .gw .item p { margin:0; line-height:1.7; font-size:14px; }
   .gw details { margin-top:12px; } .gw summary { cursor:pointer; font-size:14px; opacity:.75; }
   .gw .item.off { opacity:.55; }
+  .trait .one { font-family:'Jua',sans-serif; font-size:18px; text-align:center; margin:4px 0 14px; padding:12px; border-radius:14px; background:var(--accent); }
+  .trait h4 { font-family:'Jua',sans-serif; font-size:16px; margin:16px 0 6px; }
+  .trait .say { display:inline-block; background:#fff; border:2px solid var(--accent); border-radius:12px; padding:6px 10px; margin:3px; font-size:14px; }
+  .trait .twist { margin-top:16px; padding:12px; border-radius:14px; border:2px dashed var(--accent); line-height:1.7; font-size:14px; }
+  .trait .twist b { font-family:'Jua',sans-serif; display:block; font-size:16px; margin-bottom:2px; }
   .note { font-size:12px; color:#fff; opacity:.8; text-align:center; line-height:1.6; padding:8px 12px; }
   /* 따라다니는 캐릭터 */
   #buddy { position:fixed; right:14px; bottom:18px; width:96px; height:96px; z-index:10;
@@ -198,6 +203,7 @@ const DATA = {
   tips:['물 자주 마셔서 열 식히기', '일정표에 쉬는 시간도 미리 적어두기', '저녁 산책이나 짧은 명상'] }
 };
 
+const TRAITS={"gyehae": {"one": "고요한 바다 아래 거대한 세계를 품은 사람", "per": ["바다처럼 깊고 넓은 마음을 가져서 웬만한 일에는 쉽게 흔들리지 않아요.", "직관이 뛰어나 말하지 않아도 사람 속마음과 분위기를 금방 읽어요.", "겉으로는 순하고 느긋해 보이지만, 속에는 자기만의 기준과 고집이 단단해요.", "상상력이 풍부해서 머릿속에 늘 이야기가 흘러가고, 혼자만의 시간으로 에너지를 채워요.", "60갑자의 마지막 일주라서, 한 바퀴를 돌아본 듯한 어른스러움과 지혜가 있어요."], "rel": ["이야기를 잘 들어주는 상담가 타입이라 주변에 고민을 털어놓는 사람이 많아요.", "마음을 여는 데 시간이 걸리지만, 한번 정을 주면 오래오래 가요.", "서운한 일이 있어도 바로 말하기보다 속으로 삭이는 편이에요."], "job": ["기획, 연구, 상담, 예술, 콘텐츠처럼 깊이 생각하고 감성을 쓰는 일에서 빛나요.", "남들이 못 보는 흐름과 가능성을 먼저 알아채는 눈이 있어요.", "정해진 틀보다 자율성이 주어질 때 실력이 확 살아나요."], "say": ["속을 알 수가 없어", "너랑 얘기하면 마음이 편해", "은근 고집 세다?"], "twist": "느긋해 보이다가도 마음먹으면 파도처럼 몰아치는 추진력이 숨어 있어요."}, "gapja": {"one": "겨울 강가에 우뚝 선 큰 나무, 새 길을 여는 사람", "per": ["60갑자의 첫 번째 일주로, 처음과 시작과 개척의 아이콘이에요.", "큰 나무처럼 곧고 정직해서 원칙을 중요하게 여겨요.", "머리 회전이 빠르고 아이디어가 많아 늘 다음 계획을 세우고 있어요.", "자존심이 강해서 지는 걸 싫어하고, 스스로에게도 엄격한 편이에요.", "차가운 물 위의 나무라 겉은 차분해 보여도, 속에는 성장하고 싶은 열망이 뜨거워요."], "rel": ["자연스럽게 리더 역할을 맡게 되고, 사람들이 의지하는 큰 나무 같은 존재예요.", "책임감이 강해 믿음직하지만, 가끔은 고집 때문에 부딪히기도 해요.", "인정받고 칭찬받을 때 가장 큰 힘이 나요."], "job": ["기획, 교육, 창업, 새 프로젝트처럼 처음 길을 내는 일과 잘 맞아요.", "배우는 속도가 빨라 낯선 분야에서도 금방 자리를 잡아요.", "같은 일을 반복하기보다 성장이 눈에 보이는 일에서 신이 나요."], "say": ["추진력 대박", "고집 좀 꺾어~", "너 처음부터 잘했어?"], "twist": "강하고 단단해 보이지만 속은 여려서, 따뜻한 칭찬 한마디에 하루 종일 기분이 좋아져요."}, "byeongo": {"one": "한여름 정오의 태양, 어디서든 빛나는 사람", "per": ["불이 두 겹으로 겹친, 60갑자 중에서도 손꼽히게 뜨거운 일주예요.", "밝고 솔직해서 숨기는 게 없고, 감정이 얼굴에 그대로 드러나요.", "하고 싶은 게 생기면 바로 달려가는 열정과 추진력이 있어요.", "정의감이 강해서 불공평한 일을 보면 그냥 넘어가지 못해요.", "화끈하게 타오르는 만큼 금방 식기도 해서, 관심사가 자주 바뀌기도 해요."], "rel": ["어디서든 분위기 메이커라 주변에 사람이 끊이지 않아요.", "좋고 싫음이 확실하고 뒤끝이 없어서 오히려 편하다는 말을 들어요.", "말이 직설적이라 의도와 다르게 오해를 살 때가 있어요."], "job": ["영업, 방송, 강의, 마케팅, 무대처럼 사람들 앞에서 빛나는 일과 잘 맞아요.", "결정이 빠르고 실행력이 좋아 일을 시원하게 밀고 나가요.", "지루한 반복 업무는 힘들어하니 변화와 자극이 있는 환경이 좋아요."], "say": ["그 에너지 어디서 나와?", "너 있으면 분위기 살아", "말 좀 부드럽게~"], "twist": "세 보이지만 사실 정이 많고 눈물도 많아서, 감동적인 장면에서 제일 먼저 울어요."}};
 const $ = s => document.querySelector(s);
 $('#hostpig').innerHTML=SVG.pig;
 const STEM='갑을병정무기경신임계', STEMH='甲乙丙丁戊己庚辛壬癸', BR='자축인묘진사오미신유술해', BRH='子丑寅卯辰巳午未申酉戌亥';
@@ -360,7 +366,14 @@ function show(n, manse){
      <div>${d?d.tags.map(t=>`<span class="tag">${t}</span>`).join(''):''}</div>
      <p style="margin:10px 0 0;font-size:14px;opacity:.75">오행: ${ELN[f.se]} + ${ELN[f.be]}</p>
    </section>`;
-  const body=d?`<section class="card trait"><h3>이런 사람이에요</h3><ul>${li(d.traits)}</ul></section>
+  const T=TRAITS[k];
+  const body=d?`<section class="card trait"><h3>이런 사람이에요</h3>
+     <p class="one">“${T.one}”</p>
+     <h4>🧠 성격</h4><ul>${li(T.per)}</ul>
+     <h4>💞 사람 관계</h4><ul>${li(T.rel)}</ul>
+     <h4>💼 일과 재능</h4><ul>${li(T.job)}</ul>
+     <h4>💬 이런 말 자주 들어요</h4><div>${T.say.map(x=>`<span class="say">“${x}”</span>`).join('')}</div>
+     <div class="twist"><b>반전 매력</b> ${T.twist}</div></section>
    <section class="card good"><h3>건강의 좋은 점</h3><ul>${li(d.good)}</ul></section>
    <section class="card care"><h3>이건 조금 신경 써요</h3><ul>${li(d.care)}</ul></section>
    <section class="card tip"><h3>${d.animal}의 생활 팁</h3><ul>${li(d.tips)}</ul></section>`
