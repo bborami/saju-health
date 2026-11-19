@@ -137,7 +137,7 @@
   .ai .aihint { font-size:12px; opacity:.65; margin:8px 0 0; line-height:1.5; }
   @media print { .ai { display:none !important; } }
   .mode { display:flex; gap:6px; background:rgba(255,255,255,.15); border-radius:999px; padding:4px; margin:16px 0 0; }
-  .mode button { flex:1; border:0; border-radius:999px; padding:11px 0; font-family:'Jua',sans-serif; font-size:14px; white-space:nowrap; background:transparent; color:#fff; cursor:pointer; }
+  .mode button { flex:1; border:0; border-radius:999px; padding:11px 0; font-family:'Jua',sans-serif; font-size:15px; white-space:nowrap; background:transparent; color:#fff; cursor:pointer; }
   .mode button.on { background:#fff; color:var(--ink); }
   .pb h4 { font-family:'Jua',sans-serif; font-size:17px; margin:0 0 10px; }
   .pb .toggles { justify-content:flex-start; margin-bottom:8px; }
@@ -209,7 +209,7 @@
   <p>생년월일을 넣고 나의 일주 캐릭터를 만나보세요</p>
 </header>
 <main>
-  <div class="mode"><button data-m="today">🌞 오늘운세</button><button class="on" data-m="me">🔮 내 사주</button><button data-m="gh">💞 궁합</button><button data-m="lotto">🍀 로또</button></div>
+  <div class="mode"><button data-m="today">🌞 오늘의 운세</button><button class="on" data-m="me">🔮 내 사주 보기</button><button data-m="gh">💞 궁합 보기</button></div>
   <section class="card form" id="ghForm" style="display:none">
     <p class="relq">어떤 사이인가요?</p>
     <div class="rel" id="rel"><button class="on" data-r="lover">💑 배우자·연인</button><button data-r="child">👨‍👩‍👧 부모·자녀</button><button data-r="sibling">👫 형제자매</button><button data-r="friend">🤝 친구</button><button data-r="coworker">💼 직장동료</button><button data-r="partner">📈 사업파트너</button><button data-r="client">🙋 고객</button></div>
@@ -462,31 +462,30 @@ function lottoLine(){
   return pick.sort((a,b)=>a-b);
 }
 function lineHTML(l){ return `<div class="line">${l.map((n,i)=>`<span class="ball pop" style="background:${ballColor(n)};animation-delay:${i*.12}s">${n}</span>`).join('')}</div>`; }
-function showLotto(m){
+function lottoCard(m){
   const n=m.dayK, f=info(n), mom=Object.keys(GEN).find(x=>GEN[x]===f.se);
   const {c}=countOH(m), low=Object.keys(c).sort((a,b)=>c[a]-c[b]).find(x=>x!==mom&&x!==f.se);
   const T=todayInfo(n), els=[...new Set([mom,f.se,low])];
   const k=new Date(Date.now()+9*3600e3), ds=k.toISOString().slice(0,10);
   LT={key:[m.year,m.month,m.day,m.time,ds].join('|'), digits:[...new Set(els.flatMap(e=>HADO[e]))], lines:[]};
   LT.lines.push(lottoLine());
-  lastManse=m; cur=n;
-  $('#content').innerHTML=`<section class="card lotto"><h3>재미로 보는 행운 번호</h3>
-    <p class="lsub">${T?T.date+' · ':''}${n}일주 ${f.animal}의 오늘 행운 번호예요</p>
+  return `<section class="card lotto"><h3>오늘의 행운 번호</h3>
+    <p class="lsub">${n}일주 ${f.animal}의 오늘 기운으로 뽑은 로또 추천 번호예요</p>
     <div id="lines">${lineHTML(LT.lines[0])}</div>
     <button class="go" id="moreLine">🎲 한 줄 더 뽑기</button>
     <div class="why">🔮 <b>이렇게 뽑았어요</b><br>· 나를 도와주는 기운: ${ELN[mom]}(${mom}) → 끝자리 ${HADO[mom].join('·')}<br>· 나의 기운: ${ELN[f.se]}(${f.se}) → 끝자리 ${HADO[f.se].join('·')}<br>· 채우면 좋은 기운: ${ELN[low]}(${low}) → 끝자리 ${HADO[low].join('·')}<br>이 끝자리 숫자가 더 잘 나오게 뽑았어요. 같은 날 같은 생일이면 같은 번호가 나와요.</div>
     <p class="lnote">사주 오행으로 재미 삼아 뽑은 번호예요. 당첨과는 관련이 없어요. 로또는 적당히! 🙏</p>
   </section>`;
+}
+function bindLotto(){
   $('#moreLine').onclick=()=>{ if(LT.lines.length>=5) return; const l=lottoLine(); LT.lines.push(l); $('#lines').insertAdjacentHTML('beforeend',lineHTML(l)); if(LT.lines.length>=5){ $('#moreLine').disabled=true; $('#moreLine').textContent='오늘은 5줄까지예요'; } };
-  const b=$('#buddy'); b.classList.remove('pop'); $('#bubble').classList.remove('show');
-  b.innerHTML=CHAR(f.bi,f.se); setTimeout(()=>{ b.classList.add('pop'); say('행운 번호 뿅! 🍀'); },150);
-  $('#content').scrollIntoView({behavior:'smooth'});
 }
 function showToday(m){
   const n=m.dayK, f=info(n), d=ILJU[n];
   lastManse=m; cur=n; applyTheme(THEME[f.se]);
-  $('#content').innerHTML=todayCard(n)+`<section class="card tme"><div class="tmeimg">${CHAR(f.bi,f.se)}</div><div><b>${n}일주 · ${f.animal}</b><p>“${d.o}”</p></div></section>
+  $('#content').innerHTML=todayCard(n)+lottoCard(m)+`<section class="card tme"><div class="tmeimg">${CHAR(f.bi,f.se)}</div><div><b>${n}일주 · ${f.animal}</b><p>“${d.o}”</p></div></section>
     <button class="go" id="toMe">🔮 내 사주 자세히 보기</button>`;
+  bindLotto();
   $('#toMe').onclick=()=>{ mode='me'; document.querySelectorAll('.mode button').forEach(x=>x.classList.toggle('on',x.dataset.m==='me')); $('#go').textContent='내 일주 캐릭터 보기'; show(n,m); };
   const b=$('#buddy'); b.classList.remove('pop'); $('#bubble').classList.remove('show');
   b.innerHTML=CHAR(f.bi,f.se); const T=todayInfo(n); setTimeout(()=>{ b.classList.add('pop'); say('오늘은 '+T.sc+'점! '+T.title); },150);
@@ -774,10 +773,10 @@ document.querySelector('.mode').addEventListener('click',e=>{
   document.querySelectorAll('.mode button').forEach(x=>x.classList.toggle('on',x===bt));
   mode=bt.dataset.m; const gh=mode==='gh';
   $('#ghForm').style.display=gh?'':'none'; $('#meForm').style.display=gh?'none':'';
-  $('#go').textContent=mode==='today'?'오늘의 운세 보기':mode==='lotto'?'🍀 행운 번호 뽑기':'내 일주 캐릭터 보기';
-  $('#meForm').classList.toggle('lite',mode==='today'||mode==='lotto');
+  $('#go').textContent=mode==='today'?'오늘의 운세 보기':'내 일주 캐릭터 보기';
+  $('#meForm').classList.toggle('lite',mode==='today');
   $('#content').innerHTML=''; GH=null; $('#buddy').classList.remove('pop'); $('#bubble').classList.remove('show');
-  applyTheme(gh?{bg1:'#4a1530',bg2:'#d9607f',accent:'#ffc2d4',fx:'drop'}:mode==='lotto'?{bg1:'#0f3b25',bg2:'#3a9a63',accent:'#ffe27a',fx:'drop'}:THEME['수']);
+  applyTheme(gh?{bg1:'#4a1530',bg2:'#d9607f',accent:'#ffc2d4',fx:'drop'}:THEME['수']);
 });
 
 /* ---------- 입력 폼 ---------- */
@@ -831,7 +830,7 @@ function calc(o){
 $('#go').onclick=()=>{
   $('#err').textContent='';
   if(typeof Solar==='undefined'){ $('#err').textContent='만세력 계산 도구를 불러오지 못했어요. 새로고침해 주세요.'; return; }
-  try { const lite=mode==='today'||mode==='lotto', m=calc(lite?{...meInput(),unknown:true,nm:''}:undefined); if(mode==='today') showToday(m); else if(mode==='lotto') showLotto(m); else show(m.dayK,m); } catch(e){ $('#err').textContent=typeof e==='string'?e:'날짜를 다시 확인해 주세요.'; console.error(e); }
+  try { const lite=mode==='today', m=calc(lite?{...meInput(),unknown:true,nm:''}:undefined); if(mode==='today') showToday(m); else show(m.dayK,m); } catch(e){ $('#err').textContent=typeof e==='string'?e:'날짜를 다시 확인해 주세요.'; console.error(e); }
 };
 fx('water'); window.__ready=true;
 </script>
