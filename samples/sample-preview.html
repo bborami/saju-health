@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>사주와 건강 · 일주 샘플 미리보기</title>
+<script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.8/lunar.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
 <style>
   :root { --bg1:#0b2a4a; --bg2:#1d5c8f; --accent:#7fd3ff; --card:rgba(255,255,255,.92); --ink:#1d2433; }
@@ -41,6 +42,30 @@
   .cell.off { opacity:.4; }
   .cell.cur { outline:2px solid var(--ink); background:#fff; font-weight:bold; }
   .ganji .hint { font-size:12px; opacity:.7; margin:10px 0 0; text-align:center; }
+  .form .toggles { display:flex; gap:6px; justify-content:center; flex-wrap:nowrap; margin-bottom:16px; }
+  .seg { display:inline-flex; border:2px solid var(--sc); border-radius:999px; background:var(--sc); padding:2px; }
+  .seg button { border:0; background:transparent; color:#fff; font-family:'Jua',sans-serif; font-size:14px; padding:6px 9px; white-space:nowrap; border-radius:999px; cursor:pointer; }
+  .seg button.on { background:#fff; color:var(--ink); }
+  .seg.dis { opacity:.35; pointer-events:none; }
+  .row { display:flex; align-items:center; gap:10px; margin:10px 0; }
+  .row label { width:72px; text-align:right; font-family:'Jua',sans-serif; font-size:16px; flex-shrink:0; }
+  .row input[type=text] { flex:1; min-width:0; font-size:17px; padding:10px 12px; border:1px solid #cfd5df; border-radius:10px; font-family:inherit; }
+  .row input.short { flex:0 0 96px; }
+  .row input:disabled { background:#eef1f6; color:#aab; }
+  .sw { display:inline-flex; align-items:center; gap:6px; font-family:'Jua',sans-serif; font-size:15px; cursor:pointer; user-select:none; }
+  .sw i { width:46px; height:26px; border-radius:999px; background:#c9ced6; position:relative; transition:.2s; }
+  .sw i::after { content:''; position:absolute; left:3px; top:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:.2s; }
+  .sw.on i { background:#5b5bd6; } .sw.on i::after { left:23px; }
+  .go { width:100%; margin-top:14px; border:0; border-radius:14px; padding:14px; font-family:'Jua',sans-serif; font-size:19px; color:#fff; background:var(--ink); cursor:pointer; }
+  .err { color:#d33; font-size:13px; text-align:center; min-height:18px; margin:8px 0 0; }
+  .manse table { width:100%; border-collapse:separate; border-spacing:6px; table-layout:fixed; }
+  .manse th { font-size:13px; font-weight:normal; opacity:.7; }
+  .manse td { text-align:center; border-radius:12px; background:#eef1f6; padding:8px 0; }
+  .manse td b { display:block; font-size:30px; line-height:1.1; font-family:'Jua',sans-serif; }
+  .manse td span { font-size:12px; }
+  .manse td.day { background:var(--ink); color:#fff; }
+  .manse td.none { color:#aab; font-size:13px; }
+  .manse .who { text-align:center; margin:0 0 6px; font-size:14px; opacity:.8; }
   .note { font-size:12px; color:#fff; opacity:.8; text-align:center; line-height:1.6; padding:8px 12px; }
   /* 따라다니는 캐릭터 */
   #buddy { position:fixed; right:14px; bottom:18px; width:96px; height:96px; z-index:10;
@@ -62,9 +87,24 @@
 <div id="fx"></div>
 <header>
   <h1>나의 일주 캐릭터</h1>
-  <p>샘플 미리보기 · 아래 60갑자표에서 계해 · 갑자 · 병오를 눌러보세요</p>
+  <p>생년월일을 넣고 나의 일주 캐릭터를 만나보세요</p>
 </header>
-<main id="content"></main>
+<main>
+  <section class="card form">
+    <div class="toggles">
+      <div class="seg" id="g" style="--sc:#5b5bd6"><button class="on" data-v="m">남자</button><button data-v="f">여자</button></div>
+      <div class="seg" id="cal" style="--sc:#4fb3c4"><button class="on" data-v="solar">양력</button><button data-v="lunar">음력</button></div>
+      <div class="seg dis" id="leap" style="--sc:#e08e45"><button class="on" data-v="0">평달</button><button data-v="1">윤달</button></div>
+    </div>
+    <div class="row"><label>이름</label><input type="text" id="nm" placeholder="홍길동" maxlength="12"></div>
+    <div class="row"><label>생년월일</label><input type="text" id="bd" placeholder="19881230" inputmode="numeric" maxlength="8"></div>
+    <div class="row"><label>출생시간</label><input type="text" id="bt" class="short" placeholder="1459" inputmode="numeric" maxlength="4">
+      <span class="sw" id="unk"><i></i>모름</span></div>
+    <button class="go" id="go">내 일주 캐릭터 보기</button>
+    <p class="err" id="err"></p>
+  </section>
+  <div id="content"></div>
+</main>
 <p class="note">이 내용은 사주 명리의 오행 이론을 바탕으로 한 재미용 콘텐츠이며,<br>의학적 진단이나 치료를 대신하지 않습니다. 건강이 걱정되면 전문 의료진과 상담하세요.</p>
 <div id="bubble"></div>
 <div id="buddy"></div>
@@ -147,12 +187,12 @@ const STEME='목목화화토토금금수수', BRE='수토목목토화화토금�
 const STEMC=[...STEME].map(e=>EL[e][1]);
 const elh=e=>`<em style="color:${EL[e][1]};font-style:normal">${EL[e][0]}</em>`;
 const READY={'계해':'gyehae','갑자':'gapja','병오':'byeongo'};
-let cur='gyehae';
+let cur='계해';
 function ganjiGrid(){
   let h=[...STEM].map((t,s)=>`<div class="hd"><b>${STEMH[s]}</b><span>${t}</span><i>${elh(STEME[s])}</i></div>`).join('');
   for(let i=0;i<60;i++){
     const s=i%10,b=i%12,n=STEM[s]+BR[b],k=READY[n]||'';
-    h+=`<button class="cell${k?'':' off'}${k===cur?' cur':''}" data-n="${n}" data-k="${k}" title="${STEMH[s]+BRH[b]}" style="--c:${STEMC[s]}"><b>${n}</b></button>`;
+    h+=`<button class="cell${k?'':' off'}${n===cur||k===cur?' cur':''}" data-n="${n}" data-k="${k}" title="${STEMH[s]+BRH[b]}" style="--c:${STEMC[s]}"><b>${n}</b></button>`;
   }
   return `<section class="card ganji"><h3>60갑자 둘러보기</h3><div class="grid">${h}</div>
     <p class="hint">맨 윗줄은 천간과 오행이에요. 진하게 보이는 일주는 지금 볼 수 있고, 나머지는 준비 중이에요.</p></section>`;
@@ -170,36 +210,111 @@ function fx(type){
   }
 }
 function li(a){ return a.map(x=>`<li>${x}</li>`).join(''); }
-function show(k){
-  const d=DATA[k], r=document.documentElement.style;
-  r.setProperty('--bg1',d.theme.bg1); r.setProperty('--bg2',d.theme.bg2); r.setProperty('--accent',d.theme.accent);
-  document.body.style.background=`linear-gradient(180deg,${d.theme.bg1},${d.theme.bg2})`;
-  fx(d.theme.fx);
-  cur=k;
-  $('#content').innerHTML=`
-   <section class="card hero">
-     <div class="pillar"><span class="hanja">${d.hanja}</span><small>나의 일주</small></div>
-     <h2>${d.name} · ${d.animal}</h2>
-     <div>${d.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
-     <p style="margin:10px 0 0;font-size:14px;opacity:.75">오행: ${d.elem}</p>
-   </section>
-   ${ganjiGrid()}
-   <section class="card trait"><h3>이런 사람이에요</h3><ul>${li(d.traits)}</ul></section>
+const ANIMAL=['쥐','소','호랑이','토끼','용','뱀','말','양','원숭이','닭','개','돼지'];
+const COLORN={목:'푸른',화:'붉은',토:'노란',금:'하얀',수:'검은'};
+const ELN={목:'나무',화:'불',토:'흙',금:'쇠',수:'물'};
+const THEME={목:{bg1:'#0d3b2e',bg2:'#2f8f6a',accent:'#a8f0c6',fx:'leaf'},화:{bg1:'#4a0f0a',bg2:'#d9482b',accent:'#ffd23f',fx:'fire'},
+  토:{bg1:'#4a3208',bg2:'#c08a2a',accent:'#ffe08a',fx:'drop'},금:{bg1:'#23272e',bg2:'#7d8693',accent:'#e3e7ee',fx:'drop'},수:{bg1:'#06223f',bg2:'#1f6fae',accent:'#7fd3ff',fx:'water'}};
+const H2K={}; [...STEMH].forEach((h,i)=>H2K[h]=STEM[i]); [...BRH].forEach((h,i)=>H2K[h]=BR[i]);
+const toK=h=>[...h].map(c=>H2K[c]).join('');
+function info(n){
+  const si=STEM.indexOf(n[0]), bi=BR.indexOf(n[1]);
+  return {si,bi,hanja:STEMH[si]+BRH[bi],se:STEME[si],be:BRE[bi],animal:COLORN[STEME[si]]+' '+ANIMAL[bi]};
+}
+function applyTheme(t){
+  const r=document.documentElement.style;
+  r.setProperty('--bg1',t.bg1); r.setProperty('--bg2',t.bg2); r.setProperty('--accent',t.accent);
+  document.body.style.background=`linear-gradient(180deg,${t.bg1},${t.bg2})`; fx(t.fx);
+}
+function manseCard(m){
+  const cols=[['시주',m.time],['일주',m.day],['월주',m.month],['년주',m.year]];
+  return `<section class="card manse"><h3>나의 만세력</h3><p class="who">${m.who}</p><table><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr><tr>${
+    cols.map(([t,h])=>{ if(!h) return `<td class="none">시간<br>모름</td>`;
+      const n=toK(h), f=info(n);
+      return `<td class="${t==='일주'?'day':''}"><b>${h}</b><span>${n} · ${elh(f.se)}${elh(f.be)}</span></td>`; }).join('')
+  }</tr></table></section>`;
+}
+let lastManse=null;
+function show(n, manse){
+  const k=READY[n]||'', f=info(n), d=DATA[k];
+  if(manse!==undefined) lastManse=manse;
+  cur=n;
+  applyTheme(d?d.theme:THEME[f.se]);
+  const top=(lastManse && lastManse.dayK===n) ? manseCard(lastManse) : '';
+  const hero=`<section class="card hero" id="hero">
+     <div class="pillar"><span class="hanja">${f.hanja}</span><small>${top?'나의 일주':'일주'}</small></div>
+     <h2>${n}일주 · ${d?d.animal:f.animal}</h2>
+     <div>${d?d.tags.map(t=>`<span class="tag">${t}</span>`).join(''):''}</div>
+     <p style="margin:10px 0 0;font-size:14px;opacity:.75">오행: ${ELN[f.se]} + ${ELN[f.be]}</p>
+   </section>`;
+  const body=d?`<section class="card trait"><h3>이런 사람이에요</h3><ul>${li(d.traits)}</ul></section>
    <section class="card good"><h3>건강의 좋은 점</h3><ul>${li(d.good)}</ul></section>
    <section class="card care"><h3>이건 조금 신경 써요</h3><ul>${li(d.care)}</ul></section>
-   <section class="card tip"><h3>${d.animal}의 생활 팁</h3><ul>${li(d.tips)}</ul></section>`;
+   <section class="card tip"><h3>${d.animal}의 생활 팁</h3><ul>${li(d.tips)}</ul></section>`
+   :`<section class="card"><h3>🐣 ${f.animal} 캐릭터를 준비하고 있어요</h3><p style="margin:0;line-height:1.7">${n}일주의 성격과 건강 이야기는 곧 공개돼요. 지금은 60갑자표에서 계해 · 갑자 · 병오 일주를 먼저 구경해 보세요!</p></section>`;
+  $('#content').innerHTML=top+hero+ganjiGrid()+body;
   const b=$('#buddy'), bu=$('#bubble');
   b.classList.remove('pop'); bu.classList.remove('show');
-  b.innerHTML=SVG[d.svg];
-  setTimeout(()=>{ b.classList.add('pop'); bu.textContent=d.bubble; bu.classList.add('show'); },150);
-  setTimeout(()=>bu.classList.remove('show'),4500);
-  window.scrollTo({top:0,behavior:'smooth'});
+  if(d){ b.innerHTML=SVG[d.svg]; setTimeout(()=>{ b.classList.add('pop'); say(d.bubble); },150); }
+  if(window.__ready) $('#content').scrollIntoView({behavior:'smooth'});
 }
 $('#content').addEventListener('click',e=>{
   const c=e.target.closest('.cell'); if(!c) return;
-  if(c.dataset.k) show(c.dataset.k); else say(`${c.dataset.n}일주는 곧 만나요! 조금만 기다려줘 🙏`);
+  if(c.dataset.k) show(c.dataset.n); else say(`${c.dataset.n}일주는 곧 만나요! 조금만 기다려줘 🙏`);
 });
-show('gyehae');
+
+/* ---------- 입력 폼 ---------- */
+const val={g:'m',cal:'solar',leap:'0'}; let unknown=false;
+document.querySelectorAll('.seg').forEach(seg=>seg.addEventListener('click',e=>{
+  const bt=e.target.closest('button'); if(!bt) return;
+  seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===bt));
+  val[seg.id]=bt.dataset.v;
+  if(seg.id==='cal'){ $('#leap').classList.toggle('dis',val.cal!=='lunar'); if(val.cal!=='lunar'){ val.leap='0'; $('#leap').querySelectorAll('button').forEach((x,i)=>x.classList.toggle('on',i===0)); } }
+}));
+$('#unk').onclick=()=>{ unknown=!unknown; $('#unk').classList.toggle('on',unknown); $('#bt').disabled=unknown; if(unknown) $('#bt').value=''; };
+['#bd','#bt'].forEach(id=>$(id).addEventListener('input',e=>e.target.value=e.target.value.replace(/\D/g,'')));
+const pad=n=>String(n).padStart(2,'0');
+// 1987·1988 서머타임 (출생시간에서 1시간 빼기)
+function isDST(y,m,d){ const v=y*10000+m*100+d; return (v>=19870510&&v<19871011)||(v>=19880508&&v<19881009); }
+function shift(y,m,d,hh,mm,mins){ const t=new Date(Date.UTC(y,m-1,d,hh,mm)-mins*60000);
+  return [t.getUTCFullYear(),t.getUTCMonth()+1,t.getUTCDate(),t.getUTCHours(),t.getUTCMinutes()]; }
+function calc(){
+  const bd=$('#bd').value, bt=$('#bt').value;
+  if(bd.length!==8) throw '생년월일을 8자리로 입력해 주세요. (예: 19881230)';
+  let y=+bd.slice(0,4), m=+bd.slice(4,6), d=+bd.slice(6,8);
+  if(y<1900||y>2050) throw '1900년부터 2050년 사이로 입력해 주세요.';
+  let hh=12, mm=0;
+  if(!unknown){
+    if(bt.length!==4) throw '출생시간을 4자리로 입력하거나 "모름"을 눌러 주세요. (예: 1459)';
+    hh=+bt.slice(0,2); mm=+bt.slice(2,4);
+    if(hh>23||mm>59) throw '출생시간을 다시 확인해 주세요.';
+  }
+  let sol;
+  if(val.cal==='lunar'){
+    try { sol=Lunar.fromYmd(y, val.leap==='1'?-m:m, d).getSolar(); }
+    catch(e){ throw val.leap==='1'?'그 해에는 해당 윤달이 없어요. 평달로 다시 확인해 주세요.':'음력 날짜를 다시 확인해 주세요.'; }
+    const back=sol.getLunar(); if(back.getDay()!==d||Math.abs(back.getMonth())!==m) throw '음력 날짜를 다시 확인해 주세요.';
+  } else {
+    const t=new Date(Date.UTC(y,m-1,d)); if(t.getUTCMonth()!==m-1||t.getUTCDate()!==d) throw '생년월일을 다시 확인해 주세요.';
+    sol=Solar.fromYmd(y,m,d);
+  }
+  let Y=sol.getYear(), M=sol.getMonth(), D=sol.getDay();
+  let dst=!unknown&&isDST(Y,M,D);
+  const base=dst?shift(Y,M,D,hh,mm,60):[Y,M,D,hh,mm];
+  // 년·월주: 절기 시각 기준 (한국시간 → 라이브러리 기준시 UTC+8로 1시간 보정)
+  const a=shift(...base,60), ea=Solar.fromYmdHms(a[0],a[1],a[2],a[3],a[4],0).getLunar().getEightChar();
+  // 일·시주: 동경 135도 표준시와 서울(약 127도) 차이 약 30분 보정
+  const b=shift(...base,30), eb=Solar.fromYmdHms(b[0],b[1],b[2],b[3],b[4],0).getLunar().getEightChar();
+  const nm=$('#nm').value.trim();
+  const who=`${nm?nm+'님 · ':''}${val.g==='m'?'남자':'여자'} · ${val.cal==='lunar'?'음력'+(val.leap==='1'?'(윤달) ':' '):'양력 '}${y}.${pad(m)}.${pad(d)}${unknown?' · 시간 모름':' '+pad(hh)+':'+pad(mm)}${val.cal==='lunar'?` (양력 ${Y}.${pad(M)}.${pad(D)})`:''}`;
+  return {year:ea.getYear(), month:ea.getMonth(), day:eb.getDay(), time:unknown?'':eb.getTime(), dayK:toK(eb.getDay()), who};
+}
+$('#go').onclick=()=>{
+  $('#err').textContent='';
+  if(typeof Solar==='undefined'){ $('#err').textContent='만세력 계산 도구를 불러오지 못했어요. 새로고침해 주세요.'; return; }
+  try { const m=calc(); show(m.dayK,m); } catch(e){ $('#err').textContent=typeof e==='string'?e:'날짜를 다시 확인해 주세요.'; console.error(e); }
+};
+show('계해'); window.__ready=true;
 </script>
 </body>
 </html>
