@@ -490,7 +490,7 @@ const pairIn=(arr,a,b)=>arr.some(x=>x===a+b||x===b+a);
 function tipList(G){
   const r=Object.keys(REL).find(k=>REL[k]===G.R), A=G.an==='나'?'나':G.an+'님', B=G.bn==='상대방'?G.R.o:G.bn+'님';
   const out=[], add=(lab,k)=>{ if(G.R.acts[k]&&!out.some(o=>o[1]===G.R.acts[k])) out.push([lab,G.R.acts[k]]); };
-  if(r==='partner'){ add(A+':',G.ae); add(B+':',G.be); add('둘이 함께:',G.low); }
+  if(r==='partner'||r==='coworker'){ add(A+':',G.ae); add(B+':',G.be); add('둘이 함께:',G.low); }
   else if(r==='client'){ add(A+' → '+B+'에게:',G.be); add(A+' → '+B+'에게:',G.low); }
   else { add('',G.ae); add('',G.be); add('',G.low); }
   return out;
