@@ -66,6 +66,14 @@
   .manse td.day { background:var(--ink); color:#fff; }
   .manse td.none { color:#aab; font-size:13px; }
   .manse .who { text-align:center; margin:0 0 6px; font-size:14px; opacity:.8; }
+  .gw .mine { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .gw .chip { background:var(--accent); border-radius:999px; padding:6px 12px; font-family:'Jua',sans-serif; font-size:15px; }
+  .gw .item { border-top:1px dashed #cfd5df; padding:12px 0 2px; }
+  .gw .item h4 { margin:0 0 4px; font-family:'Jua',sans-serif; font-size:17px; }
+  .gw .item h4 small { font-family:'Gowun Dodum',sans-serif; font-size:12px; opacity:.6; margin-left:6px; }
+  .gw .item p { margin:0; line-height:1.7; font-size:14px; }
+  .gw details { margin-top:12px; } .gw summary { cursor:pointer; font-size:14px; opacity:.75; }
+  .gw .item.off { opacity:.55; }
   .note { font-size:12px; color:#fff; opacity:.8; text-align:center; line-height:1.6; padding:8px 12px; }
   /* 따라다니는 캐릭터 */
   #buddy { position:fixed; right:14px; bottom:18px; width:96px; height:96px; z-index:10;
@@ -234,6 +242,52 @@ function manseCard(m){
       return `<td class="${t==='일주'?'day':''}"><b>${h}</b><span>${n} · ${elh(f.se)}${elh(f.be)}</span></td>`; }).join('')
   }</tr></table></section>`;
 }
+/* ---------- 귀인 ---------- */
+const GW=[
+ {n:'천을귀인',e:'🌟',by:'일간',map:{갑:'축미',무:'축미',경:'축미',을:'자신',기:'자신',병:'해유',정:'해유',신:'인오',임:'사묘',계:'사묘'},t:'b',
+  d:'귀인 중의 으뜸이에요. 곤란할 때 도와주는 사람이 짠 하고 나타나고, 위기가 기회로 바뀌는 복이 있어요. 지칠 때 좋은 사람과 좋은 정보가 찾아오는 타입이에요.'},
+ {n:'태극귀인',e:'☯️',by:'일간',map:{갑:'자오',을:'자오',병:'묘유',정:'묘유',무:'진술축미',기:'진술축미',경:'인해',신:'인해',임:'사신',계:'사신'},t:'b',
+  d:'시작한 일을 끝까지 잘 맺는 힘이 있어요. 직감과 영감이 좋아서 중요한 순간에 좋은 선택을 하는 편이에요.'},
+ {n:'천덕귀인',e:'☀️',by:'월지',month:{인:'정',묘:'申',진:'임',사:'辛',오:'해',미:'갑',신:'계',유:'인',술:'병',해:'을',자:'사',축:'경'},
+  d:'하늘이 주는 덕이에요. 큰 어려움을 비껴가고 나쁜 일도 좋게 풀리는 보호막 같은 귀인이에요.'},
+ {n:'월덕귀인',e:'🌙',by:'월지',month:{인:'병',오:'병',술:'병',해:'갑',묘:'갑',미:'갑',신:'임',자:'임',진:'임',사:'경',유:'경',축:'경'},
+  d:'달이 주는 덕이에요. 성품이 온화하고 주변 사람들의 도움을 잘 받으며, 마음이 평안한 복이 있어요.'},
+ {n:'문창귀인',e:'📚',by:'일간',map:{갑:'사',을:'오',병:'신',정:'유',무:'신',기:'유',경:'해',신:'자',임:'인',계:'묘'},t:'b',
+  d:'총명함과 글재주의 별이에요. 공부, 시험, 글쓰기, 말하기처럼 머리와 표현을 쓰는 일에서 빛나요.'},
+ {n:'학당귀인',e:'🎓',by:'일간',map:{갑:'해',을:'오',병:'인',정:'유',무:'인',기:'유',경:'사',신:'자',임:'신',계:'묘'},t:'b',
+  d:'배움을 즐기는 기질이에요. 새로운 걸 배우는 자리에서 빛나고, 나이 들어서도 꾸준히 배우는 사람이 많아요.'},
+ {n:'암록',e:'🎁',by:'일간',map:{갑:'해',을:'술',병:'신',정:'미',무:'신',기:'미',경:'사',신:'진',임:'인',계:'축'},t:'b',
+  d:'숨어 있는 복이에요. 보이지 않는 곳에서 도움이 들어오고, 뜻밖의 행운이 찾아오는 일이 있어요.'},
+ {n:'금여록',e:'🚗',by:'일간',map:{갑:'진',을:'사',병:'미',정:'신',무:'미',기:'신',경:'술',신:'해',임:'축',계:'인'},t:'b',
+  d:'황금 수레라는 뜻이에요. 가족과 배우자 복, 생활의 여유와 품위를 상징해요.'}
+];
+const POS=['년','월','일','시'];
+function findGuiin(m){
+  const P=[m.year,m.month,m.day,m.time].map(h=>h?toK(h):'');
+  const dayStem=P[2][0], monBr=P[1][1], out=[];
+  for(const g of GW){
+    const where=[];
+    if(g.map){ const tg=g.map[dayStem]; P.forEach((p,i)=>{ if(p&&tg.includes(p[1])) where.push(POS[i]+'지'); }); }
+    else { const tg=g.month[monBr];
+      // 천덕귀인 표의 申/辛은 같은 한글 '신'을 구분하기 위한 표기 (申=지지, 辛=천간)
+      if(tg==='申'){ P.forEach((p,i)=>{ if(p&&p[1]==='신') where.push(POS[i]+'지'); }); }
+      else if(tg==='辛'){ P.forEach((p,i)=>{ if(p&&p[0]==='신') where.push(POS[i]+'간'); }); }
+      else { P.forEach((p,i)=>{ if(!p) return; if(STEM.includes(tg)&&p[0]===tg) where.push(POS[i]+'간'); if(BR.includes(tg)&&!STEM.includes(tg)&&p[1]===tg) where.push(POS[i]+'지'); }); }
+    }
+    out.push({...g,where});
+  }
+  return out;
+}
+function guiinCard(m){
+  const all=findGuiin(m), mine=all.filter(g=>g.where.length), rest=all.filter(g=>!g.where.length);
+  const item=(g,off)=>`<div class="item${off?' off':''}"><h4>${g.e} ${g.n}<small>${off?g.by+' 기준':g.where.join(' · ')+'에 있어요'}</small></h4><p>${g.d}</p></div>`;
+  return `<section class="card gw"><h3>🍀 나에게 있는 귀인</h3>
+   ${mine.length?`<div class="mine">${mine.map(g=>`<span class="chip">${g.e} ${g.n}</span>`).join('')}</div>${mine.map(g=>item(g)).join('')}`
+     :`<p style="margin:0;line-height:1.7">대표 귀인 8가지는 사주에 보이지 않아요. 귀인이 없다는 건 스스로 길을 만드는 힘이 크다는 뜻이기도 해요!</p>`}
+   ${rest.length?`<details><summary>다른 귀인도 알아보기 (${rest.length}개)</summary>${rest.map(g=>item(g,true)).join('')}</details>`:''}
+   ${m.time?'':'<p style="margin:10px 0 0;font-size:12px;opacity:.6">출생시간을 모르면 시주의 귀인은 빠져 있어요.</p>'}
+  </section>`;
+}
 let lastManse=null;
 function show(n, manse){
   const k=READY[n]||'', f=info(n), d=DATA[k];
@@ -252,7 +306,8 @@ function show(n, manse){
    <section class="card care"><h3>이건 조금 신경 써요</h3><ul>${li(d.care)}</ul></section>
    <section class="card tip"><h3>${d.animal}의 생활 팁</h3><ul>${li(d.tips)}</ul></section>`
    :`<section class="card"><h3>🐣 ${f.animal} 캐릭터를 준비하고 있어요</h3><p style="margin:0;line-height:1.7">${n}일주의 성격과 건강 이야기는 곧 공개돼요. 지금은 60갑자표에서 계해 · 갑자 · 병오 일주를 먼저 구경해 보세요!</p></section>`;
-  $('#content').innerHTML=top+hero+ganjiGrid()+body;
+  const gw=top?guiinCard(lastManse):'';
+  $('#content').innerHTML=top+gw+hero+ganjiGrid()+body;
   const b=$('#buddy'), bu=$('#bubble');
   b.classList.remove('pop'); bu.classList.remove('show');
   if(d){ b.innerHTML=SVG[d.svg]; setTimeout(()=>{ b.classList.add('pop'); say(d.bubble); },150); }
