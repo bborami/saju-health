@@ -137,7 +137,7 @@
   .ai .aihint { font-size:12px; opacity:.65; margin:8px 0 0; line-height:1.5; }
   @media print { .ai { display:none !important; } }
   .mode { display:flex; gap:6px; background:rgba(255,255,255,.15); border-radius:999px; padding:4px; margin:16px 0 0; }
-  .mode button { flex:1; border:0; border-radius:999px; padding:11px 0; font-family:'Jua',sans-serif; font-size:15px; white-space:nowrap; background:transparent; color:#fff; cursor:pointer; }
+  .mode button { flex:1; border:0; border-radius:999px; padding:11px 0; font-family:'Jua',sans-serif; font-size:14px; white-space:nowrap; background:transparent; color:#fff; cursor:pointer; }
   .mode button.on { background:#fff; color:var(--ink); }
   .pb h4 { font-family:'Jua',sans-serif; font-size:17px; margin:0 0 10px; }
   .pb .toggles { justify-content:flex-start; margin-bottom:8px; }
@@ -157,6 +157,16 @@
   .gh .tier { text-align:center; font-family:'Jua',sans-serif; font-size:20px; margin:0 0 10px; }
   .gh .kw { text-align:center; }
   .today { background:linear-gradient(160deg,#fff8e1,#ffe9c7); }
+  .lotto h3::before { content:'🍀 '; }
+  .lotto .lsub { font-size:14px; opacity:.8; margin:0 0 12px; line-height:1.6; }
+  .lotto .line { display:flex; justify-content:center; gap:6px; margin:10px 0; }
+  .lotto .ball { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Jua',sans-serif; font-size:18px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); box-shadow:inset -4px -4px 8px rgba(0,0,0,.18), 0 2px 4px rgba(0,0,0,.15); }
+  .lotto .ball.pop { animation:ballpop .45s ease both; }
+  @keyframes ballpop { 0%{transform:scale(0) rotate(-180deg)} 80%{transform:scale(1.15)} 100%{transform:scale(1)} }
+  .lotto .why { background:#f3faf5; border-radius:12px; padding:10px 12px; font-size:14px; line-height:1.7; margin-top:12px; }
+  .lotto .lnote { font-size:12px; opacity:.65; text-align:center; margin:12px 0 0; }
+  #moreLine { margin:6px 0 0; background:#3a9a63; }
+  #meForm.lite #g, #meForm.lite #rowNm, #meForm.lite #rowBt { display:none; }
   .today h3::before { content:'🌞 '; }
   .today .td { text-align:center; font-size:14px; opacity:.8; margin:0 0 4px; }
   .today .tp { text-align:center; margin:6px 0; }
@@ -199,7 +209,7 @@
   <p>생년월일을 넣고 나의 일주 캐릭터를 만나보세요</p>
 </header>
 <main>
-  <div class="mode"><button data-m="today">🌞 오늘의 운세</button><button class="on" data-m="me">🔮 내 사주 보기</button><button data-m="gh">💞 궁합 보기</button></div>
+  <div class="mode"><button data-m="today">🌞 오늘운세</button><button class="on" data-m="me">🔮 내 사주</button><button data-m="gh">💞 궁합</button><button data-m="lotto">🍀 로또</button></div>
   <section class="card form" id="ghForm" style="display:none">
     <p class="relq">어떤 사이인가요?</p>
     <div class="rel" id="rel"><button class="on" data-r="lover">💑 배우자·연인</button><button data-r="child">👨‍👩‍👧 부모·자녀</button><button data-r="sibling">👫 형제자매</button><button data-r="friend">🤝 친구</button><button data-r="coworker">💼 직장동료</button><button data-r="partner">📈 사업파트너</button><button data-r="client">🙋 고객</button></div>
@@ -214,9 +224,9 @@
       <div class="seg" id="cal" style="--sc:#4fb3c4"><button class="on" data-v="solar">양력</button><button data-v="lunar">음력</button></div>
       <div class="seg dis" id="leap" style="--sc:#e08e45"><button class="on" data-v="0">평달</button><button data-v="1">윤달</button></div>
     </div>
-    <div class="row"><label>이름</label><input type="text" id="nm" placeholder="홍길동" maxlength="12"></div>
+    <div class="row" id="rowNm"><label>이름</label><input type="text" id="nm" placeholder="홍길동" maxlength="12"></div>
     <div class="row"><label>생년월일</label><input type="text" id="bd" placeholder="19881230" inputmode="numeric" maxlength="8"></div>
-    <div class="row"><label>출생시간</label><input type="text" id="bt" class="short" placeholder="1459" inputmode="numeric" maxlength="4">
+    <div class="row" id="rowBt"><label>출생시간</label><input type="text" id="bt" class="short" placeholder="1459" inputmode="numeric" maxlength="4">
       <span class="sw" id="unk"><i></i>모름</span></div>
     <button class="go" id="go">내 일주 캐릭터 보기</button>
     <p class="err" id="err"></p>
@@ -439,6 +449,38 @@ function todayCard(n){
     <h4>⚠️ 조심할 일</h4><ul>${T.care.map(x=>`<li>${x}</li>`).join('')}</ul>
     <div class="th">🩺 오늘 챙길 곳: ${OH[T.h].organ}<br>🥗 추천 음식: ${OH[T.h].food}<br>🚶 추천 습관: ${OH[T.h].act}<br>🍀 행운의 색: ${T.lucky}</div>
   </section>`;
+}
+const HADO={수:[1,6],화:[2,7],목:[3,8],금:[4,9],토:[5,0]};
+const ballColor=n=>n<=10?'#f2b705':n<=20?'#3b82d6':n<=30?'#e0483a':n<=40?'#8a929e':'#3a9a63';
+let LT=null;
+function lottoSeed(str){ let h=1779033703^str.length; for(let i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),3432918353); h=h<<13|h>>>19; } return ()=>{ h=Math.imul(h^h>>>16,2246822507); h=Math.imul(h^h>>>13,3266489909); h^=h>>>16; return (h>>>0)/4294967296; }; }
+function lottoLine(){
+  const rnd=lottoSeed(LT.key+'#'+LT.lines.length), w=[];
+  for(let n=1;n<=45;n++) w.push([n, LT.digits.includes(n%10)?3:1]);
+  const pick=[];
+  while(pick.length<6){ const tot=w.reduce((a,x)=>a+x[1],0); let r=rnd()*tot, i=0; while(r>=w[i][1]){ r-=w[i][1]; i++; } pick.push(w[i][0]); w.splice(i,1); }
+  return pick.sort((a,b)=>a-b);
+}
+function lineHTML(l){ return `<div class="line">${l.map((n,i)=>`<span class="ball pop" style="background:${ballColor(n)};animation-delay:${i*.12}s">${n}</span>`).join('')}</div>`; }
+function showLotto(m){
+  const n=m.dayK, f=info(n), mom=Object.keys(GEN).find(x=>GEN[x]===f.se);
+  const {c}=countOH(m), low=Object.keys(c).sort((a,b)=>c[a]-c[b]).find(x=>x!==mom&&x!==f.se);
+  const T=todayInfo(n), els=[...new Set([mom,f.se,low])];
+  const k=new Date(Date.now()+9*3600e3), ds=k.toISOString().slice(0,10);
+  LT={key:[m.year,m.month,m.day,m.time,ds].join('|'), digits:[...new Set(els.flatMap(e=>HADO[e]))], lines:[]};
+  LT.lines.push(lottoLine());
+  lastManse=m; cur=n;
+  $('#content').innerHTML=`<section class="card lotto"><h3>재미로 보는 행운 번호</h3>
+    <p class="lsub">${T?T.date+' · ':''}${n}일주 ${f.animal}의 오늘 행운 번호예요</p>
+    <div id="lines">${lineHTML(LT.lines[0])}</div>
+    <button class="go" id="moreLine">🎲 한 줄 더 뽑기</button>
+    <div class="why">🔮 <b>이렇게 뽑았어요</b><br>· 나를 도와주는 기운: ${ELN[mom]}(${mom}) → 끝자리 ${HADO[mom].join('·')}<br>· 나의 기운: ${ELN[f.se]}(${f.se}) → 끝자리 ${HADO[f.se].join('·')}<br>· 채우면 좋은 기운: ${ELN[low]}(${low}) → 끝자리 ${HADO[low].join('·')}<br>이 끝자리 숫자가 더 잘 나오게 뽑았어요. 같은 날 같은 생일이면 같은 번호가 나와요.</div>
+    <p class="lnote">사주 오행으로 재미 삼아 뽑은 번호예요. 당첨과는 관련이 없어요. 로또는 적당히! 🙏</p>
+  </section>`;
+  $('#moreLine').onclick=()=>{ if(LT.lines.length>=5) return; const l=lottoLine(); LT.lines.push(l); $('#lines').insertAdjacentHTML('beforeend',lineHTML(l)); if(LT.lines.length>=5){ $('#moreLine').disabled=true; $('#moreLine').textContent='오늘은 5줄까지예요'; } };
+  const b=$('#buddy'); b.classList.remove('pop'); $('#bubble').classList.remove('show');
+  b.innerHTML=CHAR(f.bi,f.se); setTimeout(()=>{ b.classList.add('pop'); say('행운 번호 뿅! 🍀'); },150);
+  $('#content').scrollIntoView({behavior:'smooth'});
 }
 function showToday(m){
   const n=m.dayK, f=info(n), d=ILJU[n];
@@ -732,9 +774,10 @@ document.querySelector('.mode').addEventListener('click',e=>{
   document.querySelectorAll('.mode button').forEach(x=>x.classList.toggle('on',x===bt));
   mode=bt.dataset.m; const gh=mode==='gh';
   $('#ghForm').style.display=gh?'':'none'; $('#meForm').style.display=gh?'none':'';
-  $('#go').textContent=mode==='today'?'오늘의 운세 보기':'내 일주 캐릭터 보기';
+  $('#go').textContent=mode==='today'?'오늘의 운세 보기':mode==='lotto'?'🍀 행운 번호 뽑기':'내 일주 캐릭터 보기';
+  $('#meForm').classList.toggle('lite',mode==='today'||mode==='lotto');
   $('#content').innerHTML=''; GH=null; $('#buddy').classList.remove('pop'); $('#bubble').classList.remove('show');
-  applyTheme(gh?{bg1:'#4a1530',bg2:'#d9607f',accent:'#ffc2d4',fx:'drop'}:THEME['수']);
+  applyTheme(gh?{bg1:'#4a1530',bg2:'#d9607f',accent:'#ffc2d4',fx:'drop'}:mode==='lotto'?{bg1:'#0f3b25',bg2:'#3a9a63',accent:'#ffe27a',fx:'drop'}:THEME['수']);
 });
 
 /* ---------- 입력 폼 ---------- */
@@ -788,7 +831,7 @@ function calc(o){
 $('#go').onclick=()=>{
   $('#err').textContent='';
   if(typeof Solar==='undefined'){ $('#err').textContent='만세력 계산 도구를 불러오지 못했어요. 새로고침해 주세요.'; return; }
-  try { const m=calc(); if(mode==='today') showToday(m); else show(m.dayK,m); } catch(e){ $('#err').textContent=typeof e==='string'?e:'날짜를 다시 확인해 주세요.'; console.error(e); }
+  try { const lite=mode==='today'||mode==='lotto', m=calc(lite?{...meInput(),unknown:true,nm:''}:undefined); if(mode==='today') showToday(m); else if(mode==='lotto') showLotto(m); else show(m.dayK,m); } catch(e){ $('#err').textContent=typeof e==='string'?e:'날짜를 다시 확인해 주세요.'; console.error(e); }
 };
 fx('water'); window.__ready=true;
 </script>
