@@ -14,4 +14,6 @@
 
 ## 현재 상태
 
-- `samples/sample-preview.html`: 일주 샘플 3개(계해, 갑자, 병오) 미리보기
+- `samples/sample-preview.html`: 사이트 화면 (만세력 입력, 귀인·신살, 일주 결과, 복사/PDF 저장)
+- `samples/ilju-data.js`: 60갑자 일주 콘텐츠
+- `samples/characters.js`: 12띠 × 오행 색 캐릭터 SVG

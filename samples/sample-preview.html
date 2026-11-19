@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>사주와 건강 · 일주 샘플 미리보기</title>
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.8/lunar.js"></script>
+<script src="characters.js"></script>
+<script src="ilju-data.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
 <style>
   :root { --bg1:#0b2a4a; --bg2:#1d5c8f; --accent:#7fd3ff; --card:rgba(255,255,255,.92); --ink:#1d2433; }
@@ -89,6 +91,20 @@
   .trait .say { display:inline-block; background:#fff; border:2px solid var(--accent); border-radius:12px; padding:6px 10px; margin:3px; font-size:14px; }
   .trait .twist { margin-top:16px; padding:12px; border-radius:14px; border:2px dashed var(--accent); line-height:1.7; font-size:14px; }
   .trait .twist b { font-family:'Jua',sans-serif; display:block; font-size:16px; margin-bottom:2px; }
+  .heroimg { width:120px; height:120px; margin:0 auto 6px; animation:bob 2.4s ease-in-out infinite; }
+  .heroimg svg { width:100%; height:100%; }
+  .save .warn { background:#fff4d6; border-radius:12px; padding:10px 12px; font-size:14px; line-height:1.6; margin:0 0 12px; }
+  .save .btns { display:flex; gap:8px; }
+  .save .btns button { flex:1; border:0; border-radius:12px; padding:13px 6px; font-family:'Jua',sans-serif; font-size:16px; color:#fff; background:var(--ink); cursor:pointer; }
+  .save .btns button + button { background:#5b5bd6; }
+  .save .saveMsg { font-size:13px; text-align:center; margin:10px 0 0; min-height:18px; }
+  @media print {
+    body { background:#fff !important; }
+    #fx, #buddy, #bubble, .form, .save, .ganji, header p { display:none !important; }
+    header h1 { color:#1d2433; } main { padding-bottom:0; }
+    .card { box-shadow:none; border:1px solid #ddd; break-inside:avoid; }
+    .note { color:#555; }
+  }
   .note { font-size:12px; color:#fff; opacity:.8; text-align:center; line-height:1.6; padding:8px 12px; }
   /* 따라다니는 캐릭터 */
   #buddy { position:fixed; right:14px; bottom:18px; width:96px; height:96px; z-index:10;
@@ -133,94 +149,22 @@
 <div id="buddy"></div>
 
 <script>
-const SVG = {
-pig: `<svg viewBox="0 0 120 120"><ellipse cx="60" cy="108" rx="30" ry="5" fill="rgba(0,0,0,.15)"/>
- <ellipse cx="30" cy="30" rx="15" ry="12" transform="rotate(-25 30 30)" fill="#2c3140"/>
- <ellipse cx="90" cy="30" rx="15" ry="12" transform="rotate(25 90 30)" fill="#2c3140"/>
- <ellipse cx="31" cy="31" rx="8" ry="6" transform="rotate(-25 31 31)" fill="#f4a7b9"/>
- <ellipse cx="89" cy="31" rx="8" ry="6" transform="rotate(25 89 31)" fill="#f4a7b9"/>
- <ellipse cx="60" cy="62" rx="42" ry="40" fill="#2c3140"/>
- <ellipse cx="60" cy="58" rx="34" ry="30" fill="#3a4152"/>
- <circle cx="44" cy="52" r="6" fill="#fff"/><circle cx="76" cy="52" r="6" fill="#fff"/>
- <circle cx="45" cy="53" r="3.4" fill="#111"/><circle cx="77" cy="53" r="3.4" fill="#111"/>
- <circle cx="46" cy="51" r="1.2" fill="#fff"/><circle cx="78" cy="51" r="1.2" fill="#fff"/>
- <ellipse cx="60" cy="72" rx="15" ry="11" fill="#f4a7b9"/>
- <ellipse cx="55" cy="72" rx="2.6" ry="4" fill="#c46a82"/><ellipse cx="65" cy="72" rx="2.6" ry="4" fill="#c46a82"/>
- <ellipse cx="32" cy="68" rx="6" ry="4" fill="#f4a7b9" opacity=".6"/><ellipse cx="88" cy="68" rx="6" ry="4" fill="#f4a7b9" opacity=".6"/>
- <path d="M54 88 Q60 92 66 88" stroke="#f4a7b9" stroke-width="2.5" fill="none" stroke-linecap="round"/>
- <path d="M60 2 C54 12 52 16 60 20 C68 16 66 12 60 2Z" fill="#7fd3ff"/></svg>`,
-rat: `<svg viewBox="0 0 120 120"><ellipse cx="60" cy="108" rx="30" ry="5" fill="rgba(0,0,0,.15)"/>
- <path d="M96 88 C118 84 116 60 104 66" stroke="#4a8fd4" stroke-width="4" fill="none" stroke-linecap="round"/>
- <circle cx="28" cy="32" r="20" fill="#4a8fd4"/><circle cx="92" cy="32" r="20" fill="#4a8fd4"/>
- <circle cx="28" cy="32" r="12" fill="#f6b8c8"/><circle cx="92" cy="32" r="12" fill="#f6b8c8"/>
- <ellipse cx="60" cy="66" rx="38" ry="36" fill="#5ba3e6"/>
- <ellipse cx="60" cy="76" rx="22" ry="18" fill="#dcefff"/>
- <circle cx="46" cy="58" r="5.5" fill="#111"/><circle cx="74" cy="58" r="5.5" fill="#111"/>
- <circle cx="47.5" cy="56" r="1.8" fill="#fff"/><circle cx="75.5" cy="56" r="1.8" fill="#fff"/>
- <ellipse cx="60" cy="70" rx="5" ry="4" fill="#e7708f"/>
- <path d="M60 74 v5 M54 80 Q60 85 66 80" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round"/>
- <path d="M40 70 H24 M40 75 L26 80 M80 70 H96 M80 75 L94 80" stroke="#2d5f99" stroke-width="1.5" stroke-linecap="round"/>
- <ellipse cx="36" cy="68" rx="5" ry="3.5" fill="#f6b8c8" opacity=".7"/><ellipse cx="84" cy="68" rx="5" ry="3.5" fill="#f6b8c8" opacity=".7"/>
- <path d="M60 12 C52 22 56 30 60 30 C64 30 68 22 60 12Z" fill="#6cc46c"/></svg>`,
-horse: `<svg viewBox="0 0 120 120"><ellipse cx="60" cy="110" rx="30" ry="5" fill="rgba(0,0,0,.15)"/>
- <path d="M36 30 L30 8 L50 22Z" fill="#d9483b"/><path d="M84 30 L90 8 L70 22Z" fill="#d9483b"/>
- <ellipse cx="60" cy="58" rx="36" ry="34" fill="#e8584a"/>
- <path d="M38 30 C44 10 76 10 82 30 C76 22 66 26 60 20 C54 26 44 22 38 30Z" fill="#ffb347"/>
- <path d="M50 26 C54 14 66 14 70 26" fill="#ff8c2e"/>
- <ellipse cx="60" cy="84" rx="26" ry="20" fill="#f6c9a8"/>
- <circle cx="46" cy="54" r="5.5" fill="#111"/><circle cx="74" cy="54" r="5.5" fill="#111"/>
- <circle cx="47.5" cy="52" r="1.8" fill="#fff"/><circle cx="75.5" cy="52" r="1.8" fill="#fff"/>
- <ellipse cx="51" cy="82" rx="3" ry="4" fill="#9a5a3c"/><ellipse cx="69" cy="82" rx="3" ry="4" fill="#9a5a3c"/>
- <path d="M52 94 Q60 99 68 94" stroke="#9a5a3c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
- <ellipse cx="32" cy="66" rx="6" ry="4" fill="#ffb3a7" opacity=".8"/><ellipse cx="88" cy="66" rx="6" ry="4" fill="#ffb3a7" opacity=".8"/>
- <path d="M60 0 C50 12 54 20 60 20 C66 20 70 12 60 0Z" fill="#ffd23f"/></svg>`
-};
-
-const DATA = {
- gyehae: { hanja:'癸亥', name:'계해일주', animal:'검은 돼지', svg:'pig', elem:'물 + 물',
-  theme:{bg1:'#06223f', bg2:'#1f6fae', accent:'#7fd3ff', fx:'water'},
-  bubble:'나는 깊은 바다에서 온 검은 돼지! 같이 읽어볼까? 🌊',
-  tags:['#깊은바다', '#직관왕', '#속깊은감성', '#물의끝판왕'],
-  traits:['60갑자의 마지막 일주로, 물이 두 겹으로 쌓인 깊은 바다 같은 사람이에요.', '말하지 않아도 분위기와 사람 마음을 잘 읽는 직관파예요.', '겉으로는 순하고 느긋해 보이지만 속에는 자기만의 고집이 단단해요.', '상상력이 풍부하고, 혼자만의 시간으로 에너지를 채우는 타입이에요.'],
-  good:['물처럼 유연해서 컨디션이 떨어져도 회복이 빠른 편이에요.', '스트레스를 오래 쥐고 있지 않고 흘려보내는 힘이 있어요.', '순환이 잘 될 때는 피부가 촉촉하고 얼굴이 맑아 보여요.'],
-  care:['물 기운이 강해 몸이 차가워지기 쉬워요. 손발이 찬 편이라면 더 신경 써 주세요.', '오행에서 물은 신장과 방광을 상징해요. 붓기나 화장실 리듬 변화에 관심을 가져 보세요.', '생각이 많아 밤에 잠드는 시간이 늦어지기 쉬워요.'],
-  tips:['따뜻한 물을 하루 여러 번 나눠 마시기', '하체 보온과 가벼운 반신욕', '잠들기 30분 전에는 휴대폰 멀리 두기'] },
- gapja: { hanja:'甲子', name:'갑자일주', animal:'푸른 쥐', svg:'rat', elem:'나무 + 물',
-  theme:{bg1:'#0d3b2e', bg2:'#2f8f6a', accent:'#a8f0c6', fx:'leaf'},
-  bubble:'60갑자 첫 번째, 시작의 아이콘 푸른 쥐야! 🌱',
-  tags:['#새로운시작', '#쭉쭉성장', '#리더기질', '#빠른두뇌'],
-  traits:['60갑자의 첫 번째 일주로, 무엇이든 처음 시작하는 에너지가 강해요.', '큰 나무처럼 곧고 위로 자라고 싶은 성장 욕구가 있어요.', '머리 회전이 빠르고 아이디어가 많아 앞장서는 일이 잘 어울려요.', '자존심이 강해서 지는 걸 싫어하는 면도 있어요.'],
-  good:['물이 나무를 키워주는 구조라 기본 체력과 회복력이 좋은 편이에요.', '새로 시작한 운동이나 식단 습관이 잘 붙는 타입이에요.', '활동적이라 몸을 움직이며 스트레스를 푸는 데 능숙해요.'],
-  care:['오행에서 나무는 간과 눈, 근육을 상징해요. 눈 피로와 목·어깨 뭉침에 신경 써 보세요.', '앞만 보고 달리다 쉬는 타이밍을 놓치기 쉬워요.', '긴장하면 몸이 뻣뻣해지기 쉬우니 유연성을 챙겨 주세요.'],
-  tips:['20분마다 20초씩 먼 곳 바라보기', '아침저녁 5분 스트레칭', '초록 채소 한 접시 더하기'] },
- byeongo: { hanja:'丙午', name:'병오일주', animal:'붉은 말', svg:'horse', elem:'불 + 불',
-  theme:{bg1:'#4a0f0a', bg2:'#d9482b', accent:'#ffd23f', fx:'fire'},
-  bubble:'한여름 태양처럼 달리는 붉은 말이야! 🔥',
-  tags:['#한여름태양', '#열정폭발', '#솔직담백', '#추진력갑'],
-  traits:['불이 두 겹으로 겹친 일주로, 한여름 한낮의 태양 같은 사람이에요.', '밝고 솔직해서 어디서든 분위기를 띄우는 존재예요.', '하고 싶은 일이 생기면 바로 달려가는 추진력이 있어요.', '화끈하게 타오르는 만큼 금방 식기도 해요.'],
-  good:['에너지가 넘치고 혈색이 좋아 보이는 편이에요.', '활동량이 많아 몸이 빨리 데워지고 움직임이 가벼워요.', '긍정적인 마음가짐이 컨디션을 끌어올려 줘요.'],
-  care:['열이 위로 올라오기 쉬워 얼굴이 달아오르거나 가슴이 두근거릴 때가 있을 수 있어요.', '오행에서 불은 심장과 혈액순환을 상징해요. 혈압과 순환에 관심을 가져 보세요.', '확 타오른 뒤 한 번에 방전되기 쉬우니 체력 배분이 중요해요.'],
-  tips:['물 자주 마셔서 열 식히기', '일정표에 쉬는 시간도 미리 적어두기', '저녁 산책이나 짧은 명상'] }
-};
-
-const TRAITS={"gyehae": {"one": "고요한 바다 아래 거대한 세계를 품은 사람", "per": ["바다처럼 깊고 넓은 마음을 가져서 웬만한 일에는 쉽게 흔들리지 않아요.", "직관이 뛰어나 말하지 않아도 사람 속마음과 분위기를 금방 읽어요.", "겉으로는 순하고 느긋해 보이지만, 속에는 자기만의 기준과 고집이 단단해요.", "상상력이 풍부해서 머릿속에 늘 이야기가 흘러가고, 혼자만의 시간으로 에너지를 채워요.", "60갑자의 마지막 일주라서, 한 바퀴를 돌아본 듯한 어른스러움과 지혜가 있어요."], "rel": ["이야기를 잘 들어주는 상담가 타입이라 주변에 고민을 털어놓는 사람이 많아요.", "마음을 여는 데 시간이 걸리지만, 한번 정을 주면 오래오래 가요.", "서운한 일이 있어도 바로 말하기보다 속으로 삭이는 편이에요."], "job": ["기획, 연구, 상담, 예술, 콘텐츠처럼 깊이 생각하고 감성을 쓰는 일에서 빛나요.", "남들이 못 보는 흐름과 가능성을 먼저 알아채는 눈이 있어요.", "정해진 틀보다 자율성이 주어질 때 실력이 확 살아나요."], "say": ["속을 알 수가 없어", "너랑 얘기하면 마음이 편해", "은근 고집 세다?"], "twist": "느긋해 보이다가도 마음먹으면 파도처럼 몰아치는 추진력이 숨어 있어요."}, "gapja": {"one": "겨울 강가에 우뚝 선 큰 나무, 새 길을 여는 사람", "per": ["60갑자의 첫 번째 일주로, 처음과 시작과 개척의 아이콘이에요.", "큰 나무처럼 곧고 정직해서 원칙을 중요하게 여겨요.", "머리 회전이 빠르고 아이디어가 많아 늘 다음 계획을 세우고 있어요.", "자존심이 강해서 지는 걸 싫어하고, 스스로에게도 엄격한 편이에요.", "차가운 물 위의 나무라 겉은 차분해 보여도, 속에는 성장하고 싶은 열망이 뜨거워요."], "rel": ["자연스럽게 리더 역할을 맡게 되고, 사람들이 의지하는 큰 나무 같은 존재예요.", "책임감이 강해 믿음직하지만, 가끔은 고집 때문에 부딪히기도 해요.", "인정받고 칭찬받을 때 가장 큰 힘이 나요."], "job": ["기획, 교육, 창업, 새 프로젝트처럼 처음 길을 내는 일과 잘 맞아요.", "배우는 속도가 빨라 낯선 분야에서도 금방 자리를 잡아요.", "같은 일을 반복하기보다 성장이 눈에 보이는 일에서 신이 나요."], "say": ["추진력 대박", "고집 좀 꺾어~", "너 처음부터 잘했어?"], "twist": "강하고 단단해 보이지만 속은 여려서, 따뜻한 칭찬 한마디에 하루 종일 기분이 좋아져요."}, "byeongo": {"one": "한여름 정오의 태양, 어디서든 빛나는 사람", "per": ["불이 두 겹으로 겹친, 60갑자 중에서도 손꼽히게 뜨거운 일주예요.", "밝고 솔직해서 숨기는 게 없고, 감정이 얼굴에 그대로 드러나요.", "하고 싶은 게 생기면 바로 달려가는 열정과 추진력이 있어요.", "정의감이 강해서 불공평한 일을 보면 그냥 넘어가지 못해요.", "화끈하게 타오르는 만큼 금방 식기도 해서, 관심사가 자주 바뀌기도 해요."], "rel": ["어디서든 분위기 메이커라 주변에 사람이 끊이지 않아요.", "좋고 싫음이 확실하고 뒤끝이 없어서 오히려 편하다는 말을 들어요.", "말이 직설적이라 의도와 다르게 오해를 살 때가 있어요."], "job": ["영업, 방송, 강의, 마케팅, 무대처럼 사람들 앞에서 빛나는 일과 잘 맞아요.", "결정이 빠르고 실행력이 좋아 일을 시원하게 밀고 나가요.", "지루한 반복 업무는 힘들어하니 변화와 자극이 있는 환경이 좋아요."], "say": ["그 에너지 어디서 나와?", "너 있으면 분위기 살아", "말 좀 부드럽게~"], "twist": "세 보이지만 사실 정이 많고 눈물도 많아서, 감동적인 장면에서 제일 먼저 울어요."}};
 const $ = s => document.querySelector(s);
-$('#hostpig').innerHTML=SVG.pig;
+$('#hostpig').innerHTML=CHAR(11,'수');
 const STEM='갑을병정무기경신임계', STEMH='甲乙丙丁戊己庚辛壬癸', BR='자축인묘진사오미신유술해', BRH='子丑寅卯辰巳午未申酉戌亥';
 const EL={목:['木','#3a9a63'],화:['火','#e0483a'],토:['土','#c99a2e'],금:['金','#8a929e'],수:['水','#2f5fb0']};
 const STEME='목목화화토토금금수수', BRE='수토목목토화화토금금토수';
 const STEMC=[...STEME].map(e=>EL[e][1]);
 const elh=e=>`<em style="color:${EL[e][1]};font-style:normal">${EL[e][0]}</em>`;
-const READY={'계해':'gyehae','갑자':'gapja','병오':'byeongo'};
 let cur='계해';
 function ganjiGrid(){
   let h=[...STEM].map((t,s)=>`<div class="hd"><b>${STEMH[s]}</b><span>${t}</span><i>${elh(STEME[s])}</i></div>`).join('');
   for(let i=0;i<60;i++){
-    const s=i%10,b=i%12,n=STEM[s]+BR[b],k=READY[n]||'';
+    const s=i%10,b=i%12,n=STEM[s]+BR[b],k='y';
     h+=`<button class="cell${k?'':' off'}${n===cur||k===cur?' cur':''}" data-n="${n}" data-k="${k}" title="${STEMH[s]+BRH[b]}" style="--c:${STEMC[s]}"><b>${n}</b></button>`;
   }
   return `<section class="card ganji"><h3>60갑자 둘러보기</h3><div class="grid">${h}</div>
-    <p class="hint">맨 윗줄은 천간과 오행이에요. 진하게 보이는 일주는 지금 볼 수 있고, 나머지는 준비 중이에요.</p></section>`;
+    <p class="hint">맨 윗줄은 천간과 오행이에요. 궁금한 일주를 눌러 다른 사람의 일주도 구경해 보세요!</p></section>`;
 }
 function say(t){ const bu=$('#bubble'); bu.textContent=t; bu.classList.add('show'); clearTimeout(say.t); say.t=setTimeout(()=>bu.classList.remove('show'),3000); }
 function fx(type){
@@ -355,39 +299,71 @@ function guiinCard(m){
 }
 let lastManse=null;
 function show(n, manse){
-  const k=READY[n]||'', f=info(n), d=DATA[k];
+  const f=info(n), d=ILJU[n], animal=f.animal;
   if(manse!==undefined) lastManse=manse;
   cur=n;
-  applyTheme(d?d.theme:THEME[f.se]);
-  const top=(lastManse && lastManse.dayK===n) ? manseCard(lastManse) : '';
+  applyTheme(THEME[f.se]);
+  const mine=lastManse && lastManse.dayK===n;
+  const top=mine ? manseCard(lastManse) : '';
   const hero=`<section class="card hero" id="hero">
-     <div class="pillar"><span class="hanja">${f.hanja}</span><small>${top?'나의 일주':'일주'}</small></div>
-     <h2>${n}일주 · ${d?d.animal:f.animal}</h2>
-     <div>${d?d.tags.map(t=>`<span class="tag">${t}</span>`).join(''):''}</div>
+     <div class="heroimg">${CHAR(f.bi,f.se)}</div>
+     <div class="pillar"><span class="hanja">${f.hanja}</span><small>${mine?'나의 일주':'일주'}</small></div>
+     <h2>${n}일주 · ${animal}</h2>
+     <div>${d.t.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
      <p style="margin:10px 0 0;font-size:14px;opacity:.75">오행: ${ELN[f.se]} + ${ELN[f.be]}</p>
    </section>`;
-  const T=TRAITS[k];
-  const body=d?`<section class="card trait"><h3>이런 사람이에요</h3>
-     <p class="one">“${T.one}”</p>
-     <h4>🧠 성격</h4><ul>${li(T.per)}</ul>
-     <h4>💞 사람 관계</h4><ul>${li(T.rel)}</ul>
-     <h4>💼 일과 재능</h4><ul>${li(T.job)}</ul>
-     <h4>💬 이런 말 자주 들어요</h4><div>${T.say.map(x=>`<span class="say">“${x}”</span>`).join('')}</div>
-     <div class="twist"><b>반전 매력</b> ${T.twist}</div></section>
-   <section class="card good"><h3>건강의 좋은 점</h3><ul>${li(d.good)}</ul></section>
-   <section class="card care"><h3>이건 조금 신경 써요</h3><ul>${li(d.care)}</ul></section>
-   <section class="card tip"><h3>${d.animal}의 생활 팁</h3><ul>${li(d.tips)}</ul></section>`
-   :`<section class="card"><h3>🐣 ${f.animal} 캐릭터를 준비하고 있어요</h3><p style="margin:0;line-height:1.7">${n}일주의 성격과 건강 이야기는 곧 공개돼요. 지금은 60갑자표에서 계해 · 갑자 · 병오 일주를 먼저 구경해 보세요!</p></section>`;
+  const body=`<section class="card trait"><h3>이런 사람이에요</h3>
+     <p class="one">“${d.o}”</p>
+     <h4>🧠 성격</h4><ul>${li(d.p)}</ul>
+     <h4>💞 사람 관계</h4><ul>${li(d.r)}</ul>
+     <h4>💼 일과 재능</h4><ul>${li(d.j)}</ul>
+     <h4>💬 이런 말 자주 들어요</h4><div>${d.s.map(x=>`<span class="say">“${x}”</span>`).join('')}</div>
+     <div class="twist"><b>반전 매력</b> ${d.w}</div></section>
+   <section class="card good"><h3>건강의 좋은 점</h3><ul>${li(d.g)}</ul></section>
+   <section class="card care"><h3>이건 조금 신경 써요</h3><ul>${li(d.c)}</ul></section>
+   <section class="card tip"><h3>${animal}의 생활 팁</h3><ul>${li(d.x)}</ul></section>`;
+  const save=`<section class="card save"><h3>💾 결과 저장하기</h3>
+     <p class="warn">⚠️ 이 사이트는 입력한 정보와 결과를 저장하지 않아요. 창을 닫으면 사라지니 꼭 복사하거나 PDF로 저장해 두세요!</p>
+     <div class="btns"><button id="copyBtn">📋 내용 복사하기</button><button id="pdfBtn">📄 PDF로 저장하기</button></div>
+     <p class="saveMsg" id="saveMsg"></p></section>`;
   const gw=top?guiinCard(lastManse)+salCard(lastManse):'';
-  $('#content').innerHTML=hero+top+gw+body+ganjiGrid();
-  const b=$('#buddy'), bu=$('#bubble');
-  b.classList.remove('pop'); bu.classList.remove('show');
-  if(d){ b.innerHTML=SVG[d.svg]; setTimeout(()=>{ b.classList.add('pop'); say(d.bubble); },150); }
+  $('#content').innerHTML=hero+top+gw+body+save+ganjiGrid();
+  const b=$('#buddy');
+  b.classList.remove('pop'); $('#bubble').classList.remove('show');
+  b.innerHTML=CHAR(f.bi,f.se); setTimeout(()=>{ b.classList.add('pop'); say(d.b); },150);
   if(window.__ready) $('#content').scrollIntoView({behavior:'smooth'});
 }
+function resultText(){
+  const n=cur, f=info(n), d=ILJU[n], m=lastManse&&lastManse.dayK===n?lastManse:null, L=[];
+  L.push('[일주로 보는 나의 사주]','');
+  if(m){
+    L.push(m.who);
+    L.push(`만세력: 시주 ${m.time||'모름'} / 일주 ${m.day} / 월주 ${m.month} / 년주 ${m.year}`);
+    const g=findGuiin(m).filter(x=>x.where.length), sl=findSal(m).filter(x=>x.where.length);
+    if(g.length){ L.push('','■ 나에게 있는 귀인'); g.forEach(x=>L.push(`- ${x.n} (${fmtW(x.where)}): ${x.d}`)); }
+    if(sl.length){ L.push('','■ 나의 신살'); sl.forEach(x=>L.push(`- ${x.n} (${fmtW(x.where)}): ${x.d}`)); }
+    L.push('');
+  }
+  L.push(`■ ${n}일주 · ${f.animal}  ${d.t.join(' ')}`,`“${d.o}”`,'','[성격]',...d.p.map(x=>'- '+x),'','[사람 관계]',...d.r.map(x=>'- '+x),'','[일과 재능]',...d.j.map(x=>'- '+x),
+    '','[이런 말 자주 들어요] '+d.s.map(x=>`“${x}”`).join(' '),'[반전 매력] '+d.w,'','[건강의 좋은 점]',...d.g.map(x=>'- '+x),'','[이건 조금 신경 써요]',...d.c.map(x=>'- '+x),'',`[${f.animal}의 생활 팁]`,...d.x.map(x=>'- '+x),
+    '','※ 사주 명리의 오행 이론을 바탕으로 한 재미용 콘텐츠이며, 의학적 진단이나 치료를 대신하지 않습니다.');
+  return L.join('\n');
+}
+function copyText(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText) return navigator.clipboard.writeText(t);
+  return new Promise((ok,no)=>{ const a=document.createElement('textarea'); a.value=t; a.style.position='fixed'; a.style.opacity='0'; document.body.appendChild(a); a.select();
+    try{ document.execCommand('copy')?ok():no(); }catch(e){ no(e); } a.remove(); });
+}
 $('#content').addEventListener('click',e=>{
-  const c=e.target.closest('.cell'); if(!c) return;
-  if(c.dataset.k) show(c.dataset.n); else say(`${c.dataset.n}일주는 곧 만나요! 조금만 기다려줘 🙏`);
+  const c=e.target.closest('.cell'); if(c){ show(c.dataset.n); return; }
+  if(e.target.closest('#copyBtn')){
+    copyText(resultText()).then(()=>{ $('#saveMsg').textContent='✅ 복사됐어요! 메모장이나 카톡에 붙여넣어 보관하세요.'; say('복사 완료! 잘 보관해줘 📋'); })
+      .catch(()=>{ $('#saveMsg').textContent='복사가 안 됐어요. 화면을 길게 눌러 직접 복사해 주세요.'; });
+  }
+  if(e.target.closest('#pdfBtn')){
+    $('#saveMsg').textContent='인쇄 화면이 열리면 대상(프린터)을 "PDF로 저장"으로 골라 주세요.';
+    try{ window.print(); }catch(err){ $('#saveMsg').textContent='이 화면에서는 PDF 저장이 막혀 있어요. 내용 복사하기를 이용해 주세요.'; }
+  }
 });
 
 /* ---------- 입력 폼 ---------- */
