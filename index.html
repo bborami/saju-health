@@ -484,9 +484,9 @@ function showToday(m){
   const n=m.dayK, f=info(n), d=ILJU[n];
   lastManse=m; cur=n; applyTheme(THEME[f.se]);
   $('#content').innerHTML=todayCard(n)+lottoCard(m)+`<section class="card tme"><div class="tmeimg">${CHAR(f.bi,f.se)}</div><div><b>${n}일주 · ${f.animal}</b><p>“${d.o}”</p></div></section>
-    <button class="go" id="toMe">🔮 내 사주 자세히 보기</button>`;
+    <button class="go" id="toMe">🔮 내 사주 자세히 보러 가기</button>`;
   bindLotto();
-  $('#toMe').onclick=()=>{ mode='me'; document.querySelectorAll('.mode button').forEach(x=>x.classList.toggle('on',x.dataset.m==='me')); $('#go').textContent='내 일주 캐릭터 보기'; show(n,m); };
+  $('#toMe').onclick=()=>{ document.querySelector('.mode button[data-m=me]').click(); $('#err').textContent='✍️ 이름, 성별, 출생시간도 넣으면 더 정확한 사주를 볼 수 있어요.'; document.querySelector('.mode').scrollIntoView({behavior:'smooth'}); };
   const b=$('#buddy'); b.classList.remove('pop'); $('#bubble').classList.remove('show');
   b.innerHTML=CHAR(f.bi,f.se); const T=todayInfo(n); setTimeout(()=>{ b.classList.add('pop'); say('오늘은 '+T.sc+'점! '+T.title); },150);
   $('#content').scrollIntoView({behavior:'smooth'});
