@@ -487,6 +487,14 @@ $('#content').addEventListener('click',e=>{
 const GEN={목:'화',화:'토',토:'금',금:'수',수:'목'}, KE={목:'토',토:'수',수:'화',화:'금',금:'목'};
 const YUKHAP=['자축','인해','묘술','진유','사신','오미'], WONJIN=['자미','축오','인유','묘신','진해','사술'];
 const pairIn=(arr,a,b)=>arr.some(x=>x===a+b||x===b+a);
+function tipList(G){
+  const r=Object.keys(REL).find(k=>REL[k]===G.R), A=G.an==='나'?'나':G.an+'님', B=G.bn==='상대방'?G.R.o:G.bn+'님';
+  const out=[], add=(lab,k)=>{ if(G.R.acts[k]&&!out.some(o=>o[1]===G.R.acts[k])) out.push([lab,G.R.acts[k]]); };
+  if(r==='partner'){ add(A+':',G.ae); add(B+':',G.be); add('둘이 함께:',G.low); }
+  else if(r==='client'){ add(A+' → '+B+'에게:',G.be); add(A+' → '+B+'에게:',G.low); }
+  else { add('',G.ae); add('',G.be); add('',G.low); }
+  return out;
+}
 const REL={
  lover:{label:'💑 배우자·연인',b:'나',o:'상대방',tiers:['💘 천생연분','💕 찰떡궁합','💗 좋은 인연','💛 노력하면 빛나는 사이'],act:'💌 추천 데이트',
   acts:{목:'숲길 산책이나 식물원 데이트',화:'공연, 축제처럼 신나는 데이트',토:'맛집 탐방과 집밥 데이트',금:'전시회, 쇼핑처럼 감각적인 데이트',수:'바다나 조용한 카페에서 깊은 대화 데이트'},
@@ -576,7 +584,7 @@ function showGH(A,B){
    <section class="card gw ghd"><h3>🔍 궁합 풀이</h3>${sec}</section>
    <section class="card gw"><h3>🌿 두 사람이 챙기면 좋은 건강</h3>
      <div class="item"><h4>두 사람 모두 ${ELN[G.low]}(${G.low}) 기운이 적은 편이에요</h4><p>🩺 함께 챙길 곳: ${OH[G.low].organ}<br>🥗 같이 먹으면 좋은 음식: ${OH[G.low].food}<br>🚶 같이 하면 좋은 습관: ${OH[G.low].act}</p></div>
-     <div class="item"><h4>${G.R.act}</h4><p>${[...new Set([G.ae,G.be,G.low])].filter(k=>G.R.acts[k]).map(k=>'· '+G.R.acts[k]).join('<br>')}</p></div></section>
+     <div class="item"><h4>${G.R.act}</h4><p>${tipList(G).map(t=>'· '+(t[0]?'<b>'+t[0]+'</b> ':'')+t[1]).join('<br>')}</p></div></section>
    <section class="card gw"><h3>🐾 두 사람의 일주</h3>
      <div class="item"><h4>${G.an} · ${G.a}일주 ${fa.animal}</h4><p>“${da.o}”</p></div>
      <div class="item"><h4>${G.bn} · ${G.b}일주 ${fb.animal}</h4><p>“${db.o}”</p></div></section>
@@ -594,7 +602,7 @@ function ghText(){
   const {A,B,G}=GH, L=[`[일주로 보는 나의 사주 · ${G.R.label.slice(2).trim()} 궁합]`,''];
   L.push(`${G.an} (${A.who.replace(/^[^·]*님 · /,'')}) · ${G.a}일주`,`${G.bn} (${B.who.replace(/^[^·]*님 · /,'')}) · ${G.b}일주`,'',`궁합 점수: ${G.sc}점 ${G.tier}`,'관계 키워드: '+G.kw.join(' '),'');
   G.out.forEach(o=>L.push(`■ ${o.t}`,o.d,''));
-  L.push(`■ ${G.R.act.slice(2).trim()}: `+[...new Set([G.ae,G.be,G.low])].filter(k=>G.R.acts[k]).map(k=>G.R.acts[k]).join(' / '),`■ 두 사람이 챙기면 좋은 건강: ${ELN[G.low]} 기운 보충 - ${OH[G.low].food} / ${OH[G.low].act}`,'','※ 사주 명리 이론을 바탕으로 한 재미용 콘텐츠입니다.');
+  L.push(`■ ${G.R.act.slice(2).trim()}: `+tipList(G).map(t=>(t[0]?t[0]+' ':'')+t[1]).join(' / '),`■ 두 사람이 챙기면 좋은 건강: ${ELN[G.low]} 기운 보충 - ${OH[G.low].food} / ${OH[G.low].act}`,'','※ 사주 명리 이론을 바탕으로 한 재미용 콘텐츠입니다.');
   return L.join('\n');
 }
 $('#content').addEventListener('click',e=>{
