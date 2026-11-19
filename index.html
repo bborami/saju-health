@@ -168,7 +168,7 @@
   #moreLine { margin:6px 0 0; background:#3a9a63; }
   #meForm.lite #g, #meForm.lite #rowNm, #meForm.lite #rowBt { display:none; }
   .today h3::before { content:'🌞 '; }
-  .today .td { text-align:center; font-size:14px; opacity:.8; margin:0 0 4px; }
+  .today .td { text-align:center; font-size:min(14px,3.5vw); white-space:nowrap; letter-spacing:-.3px; opacity:.8; margin:0 0 4px; }
   .today .tp { text-align:center; margin:6px 0; }
   .today .tp b { font-family:'Jua',sans-serif; font-size:44px; color:#e07a1f; font-weight:400; }
   .today .tt { text-align:center; font-family:'Jua',sans-serif; font-size:20px; margin:0 0 10px; }
@@ -443,7 +443,7 @@ function todayInfo(n){
 function todayCard(n){
   const T=todayInfo(n); if(!T) return '';
   return `<section class="card today"><h3>오늘의 운세</h3>
-    <p class="td">${T.date} · 오늘은 <b>${T.tH}일</b>(${T.tK}일) · 나는 ${n}일주</p>
+    <p class="td">${T.date} · <b>${T.tH}일</b>(${T.tK}일) · 나는 ${n}일주</p>
     <p class="tp"><b>${T.sc}</b>점</p><div class="tm"><i style="width:${T.sc}%"></i></div>
     <p class="tt">${T.title}</p>
     <h4>😊 좋은 일</h4><ul>${T.good.map(x=>`<li>${x}</li>`).join('')}</ul>
