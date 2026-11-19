@@ -67,6 +67,9 @@
   .manse td.none { color:#aab; font-size:13px; }
   .manse tr.gwr td { background:transparent; padding:2px 0; vertical-align:top; }
   .manse .gt { display:block; margin:2px auto; background:var(--accent); border-radius:8px; padding:3px 0; font-size:11px; line-height:1.3; }
+  .manse .gt.sal { background:#ffd9df; }
+  .manse tr.ssr td { background:transparent; padding:0; font-size:13px; }
+  .manse tr.ssr td.lbl { font-size:11px; opacity:.55; padding-top:6px; border-top:1px dashed #cfd5df; border-radius:0; }
   .manse .who { text-align:center; margin:0 0 6px; font-size:14px; opacity:.8; }
   .gw .mine { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
   .gw .chip { background:var(--accent); border-radius:999px; padding:6px 12px; font-family:'Jua',sans-serif; font-size:15px; }
@@ -239,12 +242,16 @@ function applyTheme(t){
 function manseCard(m){
   const cols=[['시주',m.time,'시'],['일주',m.day,'일'],['월주',m.month,'월'],['년주',m.year,'년']];
   const gws=findGuiin(m);
-  const gwRow=cols.map(c=>`<td>${gws.filter(g=>g.where.some(w=>w[0]===c[2])).map(g=>`<span class="gt">${g.e}<br>${g.n.replace('귀인','')}</span>`).join('')}</td>`).join('');
+  const sals=findSal(m), P=[m.year,m.month,m.day,m.time].map(h=>h?toK(h):'');
+  const gwRow=cols.map(c=>`<td>${gws.filter(g=>g.where.some(w=>w[0]===c[2])).map(g=>`<span class="gt">${g.e}<br>${g.n.replace('귀인','')}</span>`).join('')}${
+    sals.filter(g=>g.where.some(w=>w[0]===c[2])).map(g=>`<span class="gt sal">${g.e}<br>${g.n}</span>`).join('')}</td>`).join('');
+  const ssRow=(base,label)=>`<tr class="ssr"><td colspan="4" class="lbl">12신살 · ${label} 기준</td></tr><tr class="ssr">${cols.map(c=>{ const p=c[1]?toK(c[1]):''; return `<td>${p?ss12(base,p[1]):'-'}</td>`; }).join('')}</tr>`;
+  const ssRows=ssRow(P[0][1],'년지')+ssRow(P[2][1],'일지');
   return `<section class="card manse"><h3>나의 만세력</h3><p class="who">${m.who}</p><table><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr><tr>${
     cols.map(([t,h])=>{ if(!h) return `<td class="none">시간<br>모름</td>`;
       const n=toK(h), f=info(n);
       return `<td class="${t==='일주'?'day':''}"><b>${h}</b><span>${n} · ${elh(f.se)}${elh(f.be)}</span></td>`; }).join('')
-  }</tr><tr class="gwr">${gwRow}</tr></table></section>`;
+  }</tr>${ssRows}<tr class="ssr"><td colspan="4" class="lbl">귀인 · 신살</td></tr><tr class="gwr">${gwRow}</tr></table></section>`;
 }
 /* ---------- 귀인 ---------- */
 const GW=[
@@ -263,9 +270,51 @@ const GW=[
  {n:'암록',e:'🎁',by:'일간',map:{갑:'해',을:'술',병:'신',정:'미',무:'신',기:'미',경:'사',신:'진',임:'인',계:'축'},t:'b',
   d:'숨어 있는 복이에요. 보이지 않는 곳에서 도움이 들어오고, 뜻밖의 행운이 찾아오는 일이 있어요.'},
  {n:'금여록',e:'🚗',by:'일간',map:{갑:'진',을:'사',병:'미',정:'신',무:'미',기:'신',경:'술',신:'해',임:'축',계:'인'},t:'b',
-  d:'황금 수레라는 뜻이에요. 가족과 배우자 복, 생활의 여유와 품위를 상징해요.'}
+  d:'황금 수레라는 뜻이에요. 가족과 배우자 복, 생활의 여유와 품위를 상징해요.'},
+ {n:'복성귀인',e:'🍀',by:'일간',map:{갑:'인',을:'축해',병:'자술',정:'유',무:'신',기:'미',경:'오',신:'사',임:'진',계:'묘'},
+  d:'복을 타고난 별이에요. 사람 복과 재물 복이 따라서, 먹고사는 걱정이 덜한 편이에요.'},
+ {n:'천주귀인',e:'🍚',by:'일간',map:{갑:'사',을:'오',병:'사',정:'오',무:'신',기:'유',경:'해',신:'자',임:'인',계:'묘'},
+  d:'하늘의 부엌이라는 뜻이에요. 먹을 복이 많고 맛있는 음식과 인연이 깊어요. 잘 먹는 만큼 골고루 챙겨 먹는 게 포인트예요.'},
+ {n:'협록',e:'🤝',by:'일간',map:{갑:'축묘',을:'인진',병:'진오',정:'사미',무:'진오',기:'사미',경:'미유',신:'신술',임:'술자',계:'해축'},
+  d:'복(녹)을 양옆에서 끼고 있는 모양이에요. 주변 사람들 덕분에 기회와 재물이 들어오는 복이 있어요.'}
 ];
+/* ---------- 신살 ---------- */
+const SAL=[
+ {n:'현침살',e:'📍',test:(p)=>({s:'갑신'.includes(p[0]),b:'묘오신'.includes(p[1])}),
+  d:'바늘처럼 날카로운 기운이에요. 섬세하고 분석력이 뛰어나서 의료, 디자인, 기술 쪽과 잘 맞아요. 말이 날카로워지지 않게, 칼이나 뾰족한 물건에 작은 상처가 나지 않게 조심해요.'},
+ {n:'고란살',e:'🌙',test:(p)=>({s:false,b:['갑인','을사','정사','무신','신해'].includes(p)}),whole:true,
+  d:'혼자서도 씩씩하게 잘 해내는 독립심의 기운이에요. 가끔 외로움을 느낄 수 있으니 가까운 사람과 마음을 자주 나눠 보세요.'},
+ {n:'비인살',e:'⚔️',map:{갑:'유',을:'술',병:'자',정:'축',무:'자',기:'축',경:'묘',신:'진',임:'오',계:'미'},
+  d:'칼날처럼 빠른 결단력과 승부욕이 있어요. 마음이 급할 때 부딪히거나 다치지 않게 한 템포 쉬어 가면 좋아요.'},
+ {n:'낙정관살',e:'🪣',map:{갑:'사',기:'사',을:'자',경:'자',병:'신',신:'신',정:'술',임:'술',무:'묘',계:'묘'},
+  d:'우물에 빠진다는 뜻으로, 발밑을 조심하라는 신호예요. 물가, 계단, 미끄러운 길, 운전할 때 한 번 더 확인하는 습관이 좋아요.'}
+];
+function findSal(m){
+  const P=[m.year,m.month,m.day,m.time].map(h=>h?toK(h):''), ds=P[2][0];
+  return SAL.map(g=>{ const where=[];
+    P.forEach((p,i)=>{ if(!p) return;
+      if(g.map){ if(g.map[ds].includes(p[1])) where.push(POS[i]+'지'); }
+      else { const r=g.test(p); if(g.whole&&r.b) where.push(POS[i]+'주'); else { if(r.s) where.push(POS[i]+'간'); if(r.b&&!g.whole) where.push(POS[i]+'지'); } }
+    }); return {...g,where}; });
+}
+const SS12=['지살','년살','월살','망신살','장성살','반안살','역마살','육해살','화개살','겁살','재살','천살'];
+const SS12D={지살:'새 출발과 이동의 기운. 활동적이고 변화에 강해요.',년살:'도화라고도 해요. 사람을 끄는 매력과 인기가 있어요.',월살:'고생 끝에 결실을 맺는 인내심의 기운이에요.',
+ 망신살:'숨김없이 솔직한 기운. 자기 표현이 확실해요.',장성살:'장군의 별. 리더십과 책임감이 강해요.',반안살:'말 안장에 앉은 모양. 안정과 승진, 명예의 기운이에요.',
+ 역마살:'멀리 움직이는 기운. 여행, 출장, 해외와 인연이 있어요.',육해살:'섬세하고 눈치가 빨라요. 몸의 작은 신호를 잘 챙기면 좋아요.',화개살:'꽃 덮개라는 뜻. 예술, 학문, 종교적 감성이 깊어요.',
+ 겁살:'과감한 추진력의 기운. 결단이 빨라요.',재살:'전략과 집중력의 기운. 한 번 몰입하면 깊게 파고들어요.',천살:'하늘의 기운. 정신력과 직관이 좋아요.'};
+function ss12(baseBr, br){ const st={신:'신',자:'신',진:'신',인:'인',오:'인',술:'인',사:'사',유:'사',축:'사',해:'해',묘:'해',미:'해'}[baseBr];
+  return SS12[(BR.indexOf(br)-BR.indexOf(st)+12)%12]; }
+function salCard(m){
+  const sal=findSal(m).filter(g=>g.where.length);
+  const P=[m.year,m.month,m.day,m.time].map(h=>h?toK(h):'');
+  const names=[...new Set(P.filter(Boolean).map(p=>ss12(P[0][1],p[1])))];
+  return `<section class="card gw"><h3>✨ 나의 신살</h3>
+   ${sal.length?sal.map(g=>`<div class="item"><h4>${g.e} ${g.n}<small>${fmtW(g.where)}에 있어요</small></h4><p>${g.d}</p></div>`).join(''):'<p style="margin:0">눈에 띄는 신살이 없어요. 무난하고 편안한 흐름이에요!</p>'}
+   <div class="item"><h4>🔄 12신살<small>년지 기준</small></h4><p>${names.map(n=>`<b>${n}</b> ${SS12D[n]}`).join('<br>')}</p></div>
+  </section>`;
+}
 const POS=['년','월','일','시'];
+const fmtW=w=>w.map(x=>x[0]+'주'+({간:' 천간',지:' 지지',주:''})[x.slice(1)]).join(' · ');
 function findGuiin(m){
   const P=[m.year,m.month,m.day,m.time].map(h=>h?toK(h):'');
   const dayStem=P[2][0], monBr=P[1][1], out=[];
@@ -284,7 +333,7 @@ function findGuiin(m){
 }
 function guiinCard(m){
   const all=findGuiin(m), mine=all.filter(g=>g.where.length), rest=all.filter(g=>!g.where.length);
-  const item=(g,off)=>`<div class="item${off?' off':''}"><h4>${g.e} ${g.n}<small>${off?g.by+' 기준':g.where.join(' · ')+'에 있어요'}</small></h4><p>${g.d}</p></div>`;
+  const item=(g,off)=>`<div class="item${off?' off':''}"><h4>${g.e} ${g.n}<small>${off?g.by+' 기준':fmtW(g.where)+'에 있어요'}</small></h4><p>${g.d}</p></div>`;
   return `<section class="card gw"><h3>🍀 나에게 있는 귀인</h3>
    ${mine.length?`<div class="mine">${mine.map(g=>`<span class="chip">${g.e} ${g.n}</span>`).join('')}</div>${mine.map(g=>item(g)).join('')}`
      :`<p style="margin:0;line-height:1.7">대표 귀인 8가지는 사주에 보이지 않아요. 귀인이 없다는 건 스스로 길을 만드는 힘이 크다는 뜻이기도 해요!</p>`}
@@ -310,7 +359,7 @@ function show(n, manse){
    <section class="card care"><h3>이건 조금 신경 써요</h3><ul>${li(d.care)}</ul></section>
    <section class="card tip"><h3>${d.animal}의 생활 팁</h3><ul>${li(d.tips)}</ul></section>`
    :`<section class="card"><h3>🐣 ${f.animal} 캐릭터를 준비하고 있어요</h3><p style="margin:0;line-height:1.7">${n}일주의 성격과 건강 이야기는 곧 공개돼요. 지금은 60갑자표에서 계해 · 갑자 · 병오 일주를 먼저 구경해 보세요!</p></section>`;
-  const gw=top?guiinCard(lastManse):'';
+  const gw=top?guiinCard(lastManse)+salCard(lastManse):'';
   $('#content').innerHTML=top+gw+hero+ganjiGrid()+body;
   const b=$('#buddy'), bu=$('#bubble');
   b.classList.remove('pop'); bu.classList.remove('show');
