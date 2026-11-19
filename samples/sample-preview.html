@@ -29,6 +29,12 @@
   h3 { font-family:'Jua',sans-serif; font-size:20px; margin:0 0 10px; }
   ul { padding-left:20px; margin:0; line-height:1.75; }
   .good h3::before { content:'👍 '; } .care h3::before { content:'🩺 '; } .tip h3::before { content:'💡 '; } .trait h3::before { content:'✨ '; }
+  .ganji .grid { display:grid; grid-template-columns:repeat(10,1fr); gap:4px; }
+  .cell { border:0; border-top:4px solid var(--c); background:#eef1f6; border-radius:6px; padding:5px 0;
+          font-family:'Gowun Dodum',sans-serif; font-size:11px; color:var(--ink); cursor:pointer; }
+  .cell.off { opacity:.4; }
+  .cell.cur { outline:2px solid var(--ink); background:#fff; font-weight:bold; }
+  .ganji .hint { font-size:12px; opacity:.7; margin:10px 0 0; text-align:center; }
   .note { font-size:12px; color:#fff; opacity:.8; text-align:center; line-height:1.6; padding:8px 12px; }
   /* 따라다니는 캐릭터 */
   #buddy { position:fixed; right:14px; bottom:18px; width:96px; height:96px; z-index:10;
@@ -50,13 +56,8 @@
 <div id="fx"></div>
 <header>
   <h1>나의 일주 캐릭터</h1>
-  <p>샘플 미리보기 · 일주 3개 (계해 · 갑자 · 병오)</p>
+  <p>샘플 미리보기 · 아래 60갑자표에서 계해 · 갑자 · 병오를 눌러보세요</p>
 </header>
-<div class="tabs">
-  <button data-k="gyehae">계해일주 🐷</button>
-  <button data-k="gapja">갑자일주 🐭</button>
-  <button data-k="byeongo">병오일주 🐴</button>
-</div>
 <main id="content"></main>
 <p class="note">이 내용은 사주 명리의 오행 이론을 바탕으로 한 재미용 콘텐츠이며,<br>의학적 진단이나 치료를 대신하지 않습니다. 건강이 걱정되면 전문 의료진과 상담하세요.</p>
 <div id="bubble"></div>
@@ -65,8 +66,10 @@
 <script>
 const SVG = {
 pig: `<svg viewBox="0 0 120 120"><ellipse cx="60" cy="108" rx="30" ry="5" fill="rgba(0,0,0,.15)"/>
- <path d="M28 34 L22 12 L46 26Z" fill="#2c3140"/><path d="M92 34 L98 12 L74 26Z" fill="#2c3140"/>
- <path d="M30 30 L26 18 L40 26Z" fill="#f4a7b9"/><path d="M90 30 L94 18 L80 26Z" fill="#f4a7b9"/>
+ <ellipse cx="30" cy="30" rx="15" ry="12" transform="rotate(-25 30 30)" fill="#2c3140"/>
+ <ellipse cx="90" cy="30" rx="15" ry="12" transform="rotate(25 90 30)" fill="#2c3140"/>
+ <ellipse cx="31" cy="31" rx="8" ry="6" transform="rotate(-25 31 31)" fill="#f4a7b9"/>
+ <ellipse cx="89" cy="31" rx="8" ry="6" transform="rotate(25 89 31)" fill="#f4a7b9"/>
  <ellipse cx="60" cy="62" rx="42" ry="40" fill="#2c3140"/>
  <ellipse cx="60" cy="58" rx="34" ry="30" fill="#3a4152"/>
  <circle cx="44" cy="52" r="6" fill="#fff"/><circle cx="76" cy="52" r="6" fill="#fff"/>
@@ -132,6 +135,20 @@ const DATA = {
 };
 
 const $ = s => document.querySelector(s);
+const STEM='갑을병정무기경신임계', STEMH='甲乙丙丁戊己庚辛壬癸', BR='자축인묘진사오미신유술해', BRH='子丑寅卯辰巳午未申酉戌亥';
+const STEMC=['#4caf7a','#4caf7a','#e8584a','#e8584a','#e0b040','#e0b040','#c9ced6','#c9ced6','#2c3140','#2c3140'];
+const READY={'계해':'gyehae','갑자':'gapja','병오':'byeongo'};
+let cur='gyehae';
+function ganjiGrid(){
+  let h='';
+  for(let i=0;i<60;i++){
+    const s=i%10,b=i%12,n=STEM[s]+BR[b],k=READY[n]||'';
+    h+=`<button class="cell${k?'':' off'}${k===cur?' cur':''}" data-n="${n}" data-k="${k}" title="${STEMH[s]+BRH[b]}" style="--c:${STEMC[s]}">${n}</button>`;
+  }
+  return `<section class="card ganji"><h3>60갑자 둘러보기</h3><div class="grid">${h}</div>
+    <p class="hint">진하게 보이는 일주는 지금 볼 수 있어요. 나머지는 준비 중이에요.</p></section>`;
+}
+function say(t){ const bu=$('#bubble'); bu.textContent=t; bu.classList.add('show'); clearTimeout(say.t); say.t=setTimeout(()=>bu.classList.remove('show'),3000); }
 function fx(type){
   const box = $('#fx'); box.innerHTML='';
   for(let i=0;i<18;i++){
@@ -149,7 +166,7 @@ function show(k){
   r.setProperty('--bg1',d.theme.bg1); r.setProperty('--bg2',d.theme.bg2); r.setProperty('--accent',d.theme.accent);
   document.body.style.background=`linear-gradient(180deg,${d.theme.bg1},${d.theme.bg2})`;
   fx(d.theme.fx);
-  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+  cur=k;
   $('#content').innerHTML=`
    <section class="card hero">
      <div class="pillar"><span class="hanja">${d.hanja}</span><small>나의 일주</small></div>
@@ -157,6 +174,7 @@ function show(k){
      <div>${d.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
      <p style="margin:10px 0 0;font-size:14px;opacity:.75">오행: ${d.elem}</p>
    </section>
+   ${ganjiGrid()}
    <section class="card trait"><h3>이런 사람이에요</h3><ul>${li(d.traits)}</ul></section>
    <section class="card good"><h3>건강의 좋은 점</h3><ul>${li(d.good)}</ul></section>
    <section class="card care"><h3>이건 조금 신경 써요</h3><ul>${li(d.care)}</ul></section>
@@ -168,7 +186,10 @@ function show(k){
   setTimeout(()=>bu.classList.remove('show'),4500);
   window.scrollTo({top:0,behavior:'smooth'});
 }
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>show(b.dataset.k));
+$('#content').addEventListener('click',e=>{
+  const c=e.target.closest('.cell'); if(!c) return;
+  if(c.dataset.k) show(c.dataset.k); else say(`${c.dataset.n}일주는 곧 만나요! 조금만 기다려줘 🙏`);
+});
 show('gyehae');
 </script>
 </body>
