@@ -13,7 +13,7 @@
          background:linear-gradient(180deg,var(--bg1),var(--bg2)); min-height:100vh; transition:background .8s; }
   header { text-align:center; padding:28px 16px 8px; color:#fff; }
   header h1 { font-family:'Jua',sans-serif; font-size:28px; margin:0 0 6px; }
-  #hostpig { display:inline-block; width:46px; height:46px; background:rgba(255,255,255,.9); border-radius:50%; padding:4px; box-sizing:border-box; vertical-align:middle; margin:-8px 0 0 4px; animation:wiggle 2.6s ease-in-out infinite; }
+  #hostpig { display:inline-block; width:46px; height:46px; filter:drop-shadow(0 0 4px rgba(255,255,255,.55)); vertical-align:middle; margin:-8px 0 0 4px; animation:wiggle 2.6s ease-in-out infinite; }
   #hostpig svg { width:100%; height:100%; }
   @keyframes wiggle { 0%,100% { transform:rotate(0) } 50% { transform:rotate(-10deg) translateY(-3px) } }
   header p { margin:0; opacity:.85; font-size:14px; }
@@ -364,7 +364,7 @@ function show(n, manse){
    <section class="card tip"><h3>${d.animal}의 생활 팁</h3><ul>${li(d.tips)}</ul></section>`
    :`<section class="card"><h3>🐣 ${f.animal} 캐릭터를 준비하고 있어요</h3><p style="margin:0;line-height:1.7">${n}일주의 성격과 건강 이야기는 곧 공개돼요. 지금은 60갑자표에서 계해 · 갑자 · 병오 일주를 먼저 구경해 보세요!</p></section>`;
   const gw=top?guiinCard(lastManse)+salCard(lastManse):'';
-  $('#content').innerHTML=hero+top+gw+ganjiGrid()+body;
+  $('#content').innerHTML=hero+top+gw+body+ganjiGrid();
   const b=$('#buddy'), bu=$('#bubble');
   b.classList.remove('pop'); bu.classList.remove('show');
   if(d){ b.innerHTML=SVG[d.svg]; setTimeout(()=>{ b.classList.add('pop'); say(d.bubble); },150); }
