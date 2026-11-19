@@ -569,7 +569,7 @@ function showGH(A,B){
   const G=gunghap(A,B), fa=info(G.a), fb=info(G.b), da=ILJU[G.a], db=ILJU[G.b];
   GH={A,B,G};
   applyTheme({bg1:'#4a1530',bg2:'#d9607f',accent:'#ffc2d4',fx:'drop'});
-  const sec=G.out.map(o=>`<div class="item"><h4>${o.t}<span class="pts">${o.p>0?'+':''}${o.p}</span></h4><p>${o.d}</p></div>`).join('');
+  const sec=G.out.map(o=>`<div class="item"><h4>${o.t}</h4><p>${o.d}</p></div>`).join('');
   $('#content').innerHTML=`<section class="card gh"><h3>${G.R.label} 궁합</h3>
      <div class="pair"><div class="pc"><div>${CHAR(fa.bi,fa.se)}</div>${G.an}<br><small>${G.a}일주</small></div><span class="hrt">${G.R.label.split(' ')[0]}</span><div class="pc"><div>${CHAR(fb.bi,fb.se)}</div>${G.bn}<br><small>${G.b}일주</small></div></div>
      <p class="score">${G.sc}<small>점</small></p><div class="meter"><i style="width:${G.sc}%"></i></div><p class="tier">${G.tier}</p><div class="kw">${G.kw.map(k=>`<span class="tag">${k}</span>`).join('')}</div></section>
@@ -593,7 +593,7 @@ function showGH(A,B){
 function ghText(){
   const {A,B,G}=GH, L=[`[일주로 보는 나의 사주 · ${G.R.label.slice(2).trim()} 궁합]`,''];
   L.push(`${G.an} (${A.who.replace(/^[^·]*님 · /,'')}) · ${G.a}일주`,`${G.bn} (${B.who.replace(/^[^·]*님 · /,'')}) · ${G.b}일주`,'',`궁합 점수: ${G.sc}점 ${G.tier}`,'관계 키워드: '+G.kw.join(' '),'');
-  G.out.forEach(o=>L.push(`■ ${o.t} (${o.p>0?'+':''}${o.p})`,o.d,''));
+  G.out.forEach(o=>L.push(`■ ${o.t}`,o.d,''));
   L.push(`■ ${G.R.act.slice(2).trim()}: `+[...new Set([G.ae,G.be,G.low])].filter(k=>G.R.acts[k]).map(k=>G.R.acts[k]).join(' / '),`■ 두 사람이 챙기면 좋은 건강: ${ELN[G.low]} 기운 보충 - ${OH[G.low].food} / ${OH[G.low].act}`,'','※ 사주 명리 이론을 바탕으로 한 재미용 콘텐츠입니다.');
   return L.join('\n');
 }
