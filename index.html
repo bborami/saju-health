@@ -209,7 +209,7 @@
   <p>생년월일을 넣고 나의 일주 캐릭터를 만나보세요</p>
 </header>
 <main>
-  <div class="mode"><button data-m="today">🌞 오늘의 운세</button><button class="on" data-m="me">🔮 내 사주 보기</button><button data-m="gh">💞 궁합 보기</button></div>
+  <div class="mode"><button class="on" data-m="today">🌞 오늘의 운세</button><button data-m="me">🔮 내 사주 보기</button><button data-m="gh">💞 궁합 보기</button></div>
   <section class="card form" id="ghForm" style="display:none">
     <p class="relq">어떤 사이인가요?</p>
     <div class="rel" id="rel"><button class="on" data-r="lover">💑 배우자·연인</button><button data-r="child">👨‍👩‍👧 부모·자녀</button><button data-r="sibling">👫 형제자매</button><button data-r="friend">🤝 친구</button><button data-r="coworker">💼 직장동료</button><button data-r="partner">📈 사업파트너</button><button data-r="client">🙋 고객</button></div>
@@ -832,7 +832,7 @@ $('#go').onclick=()=>{
   if(typeof Solar==='undefined'){ $('#err').textContent='만세력 계산 도구를 불러오지 못했어요. 새로고침해 주세요.'; return; }
   try { const lite=mode==='today', m=calc(lite?{...meInput(),unknown:true,nm:''}:undefined); if(mode==='today') showToday(m); else show(m.dayK,m); } catch(e){ $('#err').textContent=typeof e==='string'?e:'날짜를 다시 확인해 주세요.'; console.error(e); }
 };
-fx('water'); window.__ready=true;
+document.querySelector(".mode button[data-m=today]").click(); fx('water'); window.__ready=true;
 </script>
 </body>
 </html>
