@@ -30,8 +30,14 @@
   ul { padding-left:20px; margin:0; line-height:1.75; }
   .good h3::before { content:'👍 '; } .care h3::before { content:'🩺 '; } .tip h3::before { content:'💡 '; } .trait h3::before { content:'✨ '; }
   .ganji .grid { display:grid; grid-template-columns:repeat(10,1fr); gap:4px; }
-  .cell { border:0; border-top:4px solid var(--c); background:#eef1f6; border-radius:6px; padding:5px 0;
-          font-family:'Gowun Dodum',sans-serif; font-size:11px; color:var(--ink); cursor:pointer; }
+  .cell { border:0; border-top:4px solid var(--c); background:#eef1f6; border-radius:6px; padding:4px 0 3px;
+          font-family:'Gowun Dodum',sans-serif; color:var(--ink); cursor:pointer; display:flex; flex-direction:column; align-items:center; line-height:1.2; }
+  .cell b { font-size:12px; font-weight:normal; }
+  .cell span { font-size:10px; opacity:.75; }
+  .cell i { font-style:normal; font-size:10px; font-weight:bold; letter-spacing:-1px; }
+  .hd { display:flex; flex-direction:column; align-items:center; line-height:1.2; padding-bottom:4px; }
+  .hd b { font-size:15px; } .hd span { font-size:10px; opacity:.7; } .hd i { font-style:normal; font-size:12px; font-weight:bold; }
+  .cell b { font-size:11px; }
   .cell.off { opacity:.4; }
   .cell.cur { outline:2px solid var(--ink); background:#fff; font-weight:bold; }
   .ganji .hint { font-size:12px; opacity:.7; margin:10px 0 0; text-align:center; }
@@ -136,17 +142,20 @@ const DATA = {
 
 const $ = s => document.querySelector(s);
 const STEM='갑을병정무기경신임계', STEMH='甲乙丙丁戊己庚辛壬癸', BR='자축인묘진사오미신유술해', BRH='子丑寅卯辰巳午未申酉戌亥';
-const STEMC=['#4caf7a','#4caf7a','#e8584a','#e8584a','#e0b040','#e0b040','#c9ced6','#c9ced6','#2c3140','#2c3140'];
+const EL={목:['木','#3a9a63'],화:['火','#e0483a'],토:['土','#c99a2e'],금:['金','#8a929e'],수:['水','#2f5fb0']};
+const STEME='목목화화토토금금수수', BRE='수토목목토화화토금금토수';
+const STEMC=[...STEME].map(e=>EL[e][1]);
+const elh=e=>`<em style="color:${EL[e][1]};font-style:normal">${EL[e][0]}</em>`;
 const READY={'계해':'gyehae','갑자':'gapja','병오':'byeongo'};
 let cur='gyehae';
 function ganjiGrid(){
-  let h='';
+  let h=[...STEM].map((t,s)=>`<div class="hd"><b>${STEMH[s]}</b><span>${t}</span><i>${elh(STEME[s])}</i></div>`).join('');
   for(let i=0;i<60;i++){
     const s=i%10,b=i%12,n=STEM[s]+BR[b],k=READY[n]||'';
-    h+=`<button class="cell${k?'':' off'}${k===cur?' cur':''}" data-n="${n}" data-k="${k}" title="${STEMH[s]+BRH[b]}" style="--c:${STEMC[s]}">${n}</button>`;
+    h+=`<button class="cell${k?'':' off'}${k===cur?' cur':''}" data-n="${n}" data-k="${k}" title="${STEMH[s]+BRH[b]}" style="--c:${STEMC[s]}"><b>${n}</b></button>`;
   }
   return `<section class="card ganji"><h3>60갑자 둘러보기</h3><div class="grid">${h}</div>
-    <p class="hint">진하게 보이는 일주는 지금 볼 수 있어요. 나머지는 준비 중이에요.</p></section>`;
+    <p class="hint">맨 윗줄은 천간과 오행이에요. 진하게 보이는 일주는 지금 볼 수 있고, 나머지는 준비 중이에요.</p></section>`;
 }
 function say(t){ const bu=$('#bubble'); bu.textContent=t; bu.classList.add('show'); clearTimeout(say.t); say.t=setTimeout(()=>bu.classList.remove('show'),3000); }
 function fx(type){
