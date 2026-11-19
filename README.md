@@ -14,6 +14,10 @@
 
 ## 현재 상태
 
-- `samples/sample-preview.html`: 사이트 화면 (만세력 입력, 귀인·신살, 일주 결과, 복사/PDF 저장)
-- `samples/ilju-data.js`: 60갑자 일주 콘텐츠
-- `samples/characters.js`: 12띠 × 오행 색 캐릭터 SVG
+- `index.html`: 사이트 화면 (만세력 입력, 귀인·신살, 일주 결과, 복사/PDF 저장)
+- `ilju-data.js`: 60갑자 일주 콘텐츠
+- `characters.js`: 12띠 × 오행 색 캐릭터 SVG
+
+## 사이트 주소
+
+https://bborami.github.io/saju-health/
