@@ -137,7 +137,7 @@
   .ai .aihint { font-size:12px; opacity:.65; margin:8px 0 0; line-height:1.5; }
   @media print { .ai { display:none !important; } }
   .mode { display:flex; gap:6px; background:rgba(255,255,255,.15); border-radius:999px; padding:4px; margin:16px 0 0; }
-  .mode button { flex:1; border:0; border-radius:999px; padding:11px 0; font-family:'Jua',sans-serif; font-size:16px; background:transparent; color:#fff; cursor:pointer; }
+  .mode button { flex:1; border:0; border-radius:999px; padding:11px 0; font-family:'Jua',sans-serif; font-size:15px; white-space:nowrap; background:transparent; color:#fff; cursor:pointer; }
   .mode button.on { background:#fff; color:var(--ink); }
   .pb h4 { font-family:'Jua',sans-serif; font-size:17px; margin:0 0 10px; }
   .pb .toggles { justify-content:flex-start; margin-bottom:8px; }
@@ -164,6 +164,11 @@
   .today .tt { text-align:center; font-family:'Jua',sans-serif; font-size:20px; margin:0 0 10px; }
   .today .tm { height:12px; border-radius:8px; background:#f6dcb4; overflow:hidden; margin:0 10px 12px; }
   .today .tm i { display:block; height:100%; background:linear-gradient(90deg,#ffc56b,#e07a1f); border-radius:8px; }
+  .tme { display:flex; gap:12px; align-items:center; }
+  .tme .tmeimg { width:80px; height:80px; flex:none; }
+  .tme .tmeimg svg { width:100%; height:100%; }
+  .tme p { margin:4px 0 0; font-size:14px; opacity:.8; }
+  #toMe { margin:0 0 16px; }
   .today h4 { margin:12px 0 4px; }
   .today ul { margin:0; padding-left:20px; }
   .today .th { background:#fff; border-radius:12px; padding:10px 12px; margin-top:12px; font-size:14px; line-height:1.7; }
@@ -194,7 +199,7 @@
   <p>생년월일을 넣고 나의 일주 캐릭터를 만나보세요</p>
 </header>
 <main>
-  <div class="mode"><button class="on" data-m="me">🔮 내 사주 보기</button><button data-m="gh">💞 궁합 보기</button></div>
+  <div class="mode"><button data-m="today">🌞 오늘의 운세</button><button class="on" data-m="me">🔮 내 사주 보기</button><button data-m="gh">💞 궁합 보기</button></div>
   <section class="card form" id="ghForm" style="display:none">
     <p class="relq">어떤 사이인가요?</p>
     <div class="rel" id="rel"><button class="on" data-r="lover">💑 배우자·연인</button><button data-r="child">👨‍👩‍👧 부모·자녀</button><button data-r="sibling">👫 형제자매</button><button data-r="friend">🤝 친구</button><button data-r="coworker">💼 직장동료</button><button data-r="partner">📈 사업파트너</button><button data-r="client">🙋 고객</button></div>
@@ -435,6 +440,16 @@ function todayCard(n){
     <div class="th">🩺 오늘 챙길 곳: ${OH[T.h].organ}<br>🥗 추천 음식: ${OH[T.h].food}<br>🚶 추천 습관: ${OH[T.h].act}<br>🍀 행운의 색: ${T.lucky}</div>
   </section>`;
 }
+function showToday(m){
+  const n=m.dayK, f=info(n), d=ILJU[n];
+  lastManse=m; cur=n; applyTheme(THEME[f.se]);
+  $('#content').innerHTML=todayCard(n)+`<section class="card tme"><div class="tmeimg">${CHAR(f.bi,f.se)}</div><div><b>${n}일주 · ${f.animal}</b><p>“${d.o}”</p></div></section>
+    <button class="go" id="toMe">🔮 내 사주 자세히 보기</button>`;
+  $('#toMe').onclick=()=>{ mode='me'; document.querySelectorAll('.mode button').forEach(x=>x.classList.toggle('on',x.dataset.m==='me')); $('#go').textContent='내 일주 캐릭터 보기'; show(n,m); };
+  const b=$('#buddy'); b.classList.remove('pop'); $('#bubble').classList.remove('show');
+  b.innerHTML=CHAR(f.bi,f.se); const T=todayInfo(n); setTimeout(()=>{ b.classList.add('pop'); say('오늘은 '+T.sc+'점! '+T.title); },150);
+  $('#content').scrollIntoView({behavior:'smooth'});
+}
 function show(n, manse){
   const f=info(n), d=ILJU[n], animal=f.animal;
   if(manse!==undefined) lastManse=manse;
@@ -470,7 +485,7 @@ function show(n, manse){
      <div class="btns"><a class="aibtn gpt" id="gptBtn" target="_blank" rel="noopener">💬 ChatGPT로 묻기</a><a class="aibtn gem" id="gemBtn" href="https://gemini.google.com/app" target="_blank" rel="noopener">✨ Gemini로 묻기</a></div>
      <p class="saveMsg" id="aiMsg"></p>
      <p class="aihint">AI 답변은 참고용이에요.</p></section>`:'';
-  $('#content').innerHTML=todayCard(n)+hero+top+gw+body+save+ai+ganjiGrid();
+  $('#content').innerHTML=hero+top+gw+body+save+ai+ganjiGrid();
   if(mine){ const g=$('#gptBtn'); if(g) g.href='https://chatgpt.com/?q='+encodeURIComponent(aiPrompt()); }
   const b=$('#buddy');
   b.classList.remove('pop'); $('#bubble').classList.remove('show');
@@ -715,14 +730,15 @@ $('#ghGo').onclick=()=>{
 document.querySelector('.mode').addEventListener('click',e=>{
   const bt=e.target.closest('button'); if(!bt) return;
   document.querySelectorAll('.mode button').forEach(x=>x.classList.toggle('on',x===bt));
-  const gh=bt.dataset.m==='gh';
+  mode=bt.dataset.m; const gh=mode==='gh';
   $('#ghForm').style.display=gh?'':'none'; $('#meForm').style.display=gh?'none':'';
+  $('#go').textContent=mode==='today'?'오늘의 운세 보기':'내 일주 캐릭터 보기';
   $('#content').innerHTML=''; GH=null; $('#buddy').classList.remove('pop'); $('#bubble').classList.remove('show');
   applyTheme(gh?{bg1:'#4a1530',bg2:'#d9607f',accent:'#ffc2d4',fx:'drop'}:THEME['수']);
 });
 
 /* ---------- 입력 폼 ---------- */
-const val={g:'m',cal:'solar',leap:'0'}; let unknown=false;
+const val={g:'m',cal:'solar',leap:'0'}; let unknown=false, mode='me';
 document.querySelectorAll('#meForm .seg').forEach(seg=>seg.addEventListener('click',e=>{
   const bt=e.target.closest('button'); if(!bt) return;
   seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===bt));
@@ -772,7 +788,7 @@ function calc(o){
 $('#go').onclick=()=>{
   $('#err').textContent='';
   if(typeof Solar==='undefined'){ $('#err').textContent='만세력 계산 도구를 불러오지 못했어요. 새로고침해 주세요.'; return; }
-  try { const m=calc(); show(m.dayK,m); } catch(e){ $('#err').textContent=typeof e==='string'?e:'날짜를 다시 확인해 주세요.'; console.error(e); }
+  try { const m=calc(); if(mode==='today') showToday(m); else show(m.dayK,m); } catch(e){ $('#err').textContent=typeof e==='string'?e:'날짜를 다시 확인해 주세요.'; console.error(e); }
 };
 fx('water'); window.__ready=true;
 </script>
