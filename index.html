@@ -185,7 +185,7 @@
   <section class="card form" id="ghForm" style="display:none">
     <p class="relq">어떤 사이인가요?</p>
     <div class="rel" id="rel"><button class="on" data-r="lover">💑 배우자·연인</button><button data-r="friend">🤝 친구</button><button data-r="coworker">💼 직장동료</button><button data-r="partner">📈 사업파트너</button><button data-r="client">🙋 고객</button></div>
-    <div id="ghP1"></div><div class="ghsep">💗</div><div id="ghP2"></div>
+    <div id="ghP1"></div><div class="ghsep">💑</div><div id="ghP2"></div>
     <button class="go" id="ghGo">궁합 보기</button>
     <p class="err" id="ghErr"></p>
   </section>
@@ -553,7 +553,7 @@ function showGH(A,B){
   applyTheme({bg1:'#4a1530',bg2:'#d9607f',accent:'#ffc2d4',fx:'drop'});
   const sec=G.out.map(o=>`<div class="item"><h4>${o.t}<span class="pts">${o.p>0?'+':''}${o.p}</span></h4><p>${o.d}</p></div>`).join('');
   $('#content').innerHTML=`<section class="card gh"><h3>${G.R.label} 궁합</h3>
-     <div class="pair"><div class="pc"><div>${CHAR(fa.bi,fa.se)}</div>${G.an}<br><small>${G.a}일주</small></div><span class="hrt">💗</span><div class="pc"><div>${CHAR(fb.bi,fb.se)}</div>${G.bn}<br><small>${G.b}일주</small></div></div>
+     <div class="pair"><div class="pc"><div>${CHAR(fa.bi,fa.se)}</div>${G.an}<br><small>${G.a}일주</small></div><span class="hrt">${G.R.label.split(' ')[0]}</span><div class="pc"><div>${CHAR(fb.bi,fb.se)}</div>${G.bn}<br><small>${G.b}일주</small></div></div>
      <p class="score">${G.sc}<small>점</small></p><div class="meter"><i style="width:${G.sc}%"></i></div><p class="tier">${G.tier}</p></section>
    <section class="card gw ghd"><h3>🔍 궁합 풀이</h3>${sec}</section>
    <section class="card gw"><h3>🌿 두 사람이 챙기면 좋은 건강</h3>
@@ -593,12 +593,13 @@ function personBlock(i,label){
     <div class="row"><label>생년월일</label><input type="text" id="bd${i}" placeholder="19881230" inputmode="numeric" maxlength="8"></div>
     <div class="row"><label>출생시간</label><input type="text" id="bt${i}" class="short" placeholder="1459" inputmode="numeric" maxlength="4"><span class="sw punk" data-p="${i}"><i></i>모름</span></div></div>`;
 }
-$('#ghP1').innerHTML=personBlock(1,'👤 나'); $('#ghP2').innerHTML=personBlock(2,'💗 상대방');
+$('#ghP1').innerHTML=personBlock(1,'👤 나'); $('#ghP2').innerHTML=personBlock(2,'💑 상대방');
 const PV={1:{g:'m',cal:'solar',leap:'0',unknown:false},2:{g:'m',cal:'solar',leap:'0',unknown:false}};
 $('#rel').addEventListener('click',e=>{
   const bt=e.target.closest('button'); if(!bt) return;
   $('#rel').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===bt)); relType=bt.dataset.r;
-  $('#ghP2 h4').textContent='💗 '+REL[relType].o; $('#nm2').placeholder=REL[relType].o;
+  const em=REL[relType].label.split(' ')[0];
+  $('#ghP2 h4').textContent=em+' '+REL[relType].o; $('.ghsep').textContent=em; $('#nm2').placeholder=REL[relType].o;
 });
 $('#ghForm').addEventListener('click',e=>{
   const bt=e.target.closest('.pseg button');
