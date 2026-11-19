@@ -144,6 +144,7 @@
   .relq { font-family:'Jua',sans-serif; font-size:16px; margin:0 0 8px; }
   .rel { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
   .rel button { border:2px solid #f3c1d1; background:#fff; border-radius:999px; padding:7px 12px; font-family:'Jua',sans-serif; font-size:14px; color:var(--ink); cursor:pointer; }
+  .pcrole { display:flex; align-items:center; gap:8px; margin:-4px 0 14px; font-family:'Jua',sans-serif; }
   .rel button.on { background:#e5487a; border-color:#e5487a; color:#fff; }
   .ghsep { text-align:center; font-size:26px; margin:6px 0; }
   .gh .pair { display:flex; align-items:center; justify-content:center; gap:4px; }
@@ -185,7 +186,8 @@
   <div class="mode"><button class="on" data-m="me">🔮 내 사주 보기</button><button data-m="gh">💞 궁합 보기</button></div>
   <section class="card form" id="ghForm" style="display:none">
     <p class="relq">어떤 사이인가요?</p>
-    <div class="rel" id="rel"><button class="on" data-r="lover">💑 배우자·연인</button><button data-r="child">👶 자녀</button><button data-r="friend">🤝 친구</button><button data-r="coworker">💼 직장동료</button><button data-r="partner">📈 사업파트너</button><button data-r="client">🙋 고객</button></div>
+    <div class="rel" id="rel"><button class="on" data-r="lover">💑 배우자·연인</button><button data-r="child">👨‍👩‍👧 부모·자녀</button><button data-r="friend">🤝 친구</button><button data-r="coworker">💼 직장동료</button><button data-r="partner">📈 사업파트너</button><button data-r="client">🙋 고객</button></div>
+    <div class="pcrole" id="pcRole" style="display:none"><span>나는</span><div class="seg" style="--sc:#e5487a"><button class="on" data-v="parent">부모</button><button data-v="child">자녀</button></div></div>
     <div id="ghP1"></div><div class="ghsep">💑</div><div id="ghP2"></div>
     <button class="go" id="ghGo">궁합 보기</button>
     <p class="err" id="ghErr"></p>
@@ -491,7 +493,7 @@ function tipList(G){
   const r=Object.keys(REL).find(k=>REL[k]===G.R), A=G.an==='나'?'나':G.an+'님', B=(G.bn==='상대방'||G.bn===G.R.o)?G.R.o:G.bn+'님';
   const out=[], add=(lab,k)=>{ if(G.R.acts[k]&&!out.some(o=>o[1]===G.R.acts[k])) out.push([lab,G.R.acts[k]]); };
   if(r==='partner'||r==='coworker'){ add(A+':',G.ae); add(B+':',G.be); add('둘이 함께:',G.low); }
-  else if(r==='child'){ add(A+' → '+B+'에게:',G.be); add('둘이 함께:',G.low); }
+  else if(r==='child'){ const pc=G.R.o==='부모님'; add(A+' → '+B+(pc?'께:':'에게:'),G.be); add(pc?A+' → '+B+'께:':'둘이 함께:',G.low); }
   else if(r==='client'){ add(A+' → '+B+'에게:',G.be); add(A+' → '+B+'에게:',G.low); }
   else { add('',G.ae); add('',G.be); add('',G.low); }
   return out;
@@ -512,8 +514,12 @@ const REL={
  client:{label:'🙋 고객',b:'나',o:'고객',tiers:['🌟 평생 인연','💎 찰떡 신뢰','😊 좋은 관계','🌱 천천히 신뢰를 쌓는 사이'],act:'🤗 고객과 가까워지는 팁',
   acts:{목:'성장과 미래 계획 이야기로 다가가기',화:'밝고 적극적인 리액션으로 대하기',토:'꾸준한 안부 연락과 약속 지키기',금:'정확한 자료와 깔끔한 정리로 신뢰 주기',수:'충분히 들어주는 편안한 상담'},
   ask:['고객의 성향과 잘 맞는 소통 방식','신뢰를 쌓는 방법','주의하면 좋은 대화 포인트','고객이 관심 가질 만한 건강 포인트','오래가는 관계를 위한 팁']},
- child:{label:'👶 자녀',b:'나',o:'자녀',tiers:['🌈 복덩이 인연','🧸 찰떡 부모자식','🌷 다정한 사이','🌱 함께 자라는 사이'],act:'🧒 아이와 가까워지는 팁',
+ child:{label:'👨‍👩‍👧 부모·자녀',b:'나',o:'자녀',tiers:['🌈 복덩이 인연','🧸 찰떡 부모자식','🌷 다정한 사이','🌱 함께 자라는 사이'],act:'🧒 아이와 가까워지는 팁',actP:'🧒 아이와 가까워지는 팁',actC:'💐 부모님과 가까워지는 팁',
+  actsC:{목:'새로 배운 것, 앞으로의 계획 나누기',화:'자주 웃게 해드리고 고맙다고 표현하기',토:'자주 안부 전화 드리고 같이 밥 먹기',금:'약속 잘 지키고 집안일 야무지게 돕기',수:'옛날 이야기 들어드리며 천천히 대화하기'},
+  askC:['부모님과 나의 성격 궁합','부모님 성향과 잘 맞는 대화법','부딪히기 쉬운 부분과 해결 팁','부모님께 권하면 좋은 건강 습관','서로 더 가까워지는 팁'],
+  actsP:{목:'자연 체험, 식물 키우기로 호기심 키워주기',화:'칭찬과 박수로 자신감 키워주기',토:'규칙적인 생활과 함께 먹는 집밥',금:'약속을 꼭 지키고 정리 습관 같이 들이기',수:'책 읽기와 느긋한 대화로 생각할 시간 주기'},
   acts:{목:'자연 체험, 식물 키우기로 호기심 키워주기',화:'칭찬과 박수로 자신감 키워주기',토:'규칙적인 생활과 함께 먹는 집밥',금:'약속을 꼭 지키고 정리 습관 같이 들이기',수:'책 읽기와 느긋한 대화로 생각할 시간 주기'},
+  askP:['부모와 자녀의 성격 궁합','아이의 타고난 성향과 잘 맞는 대화법','부딪히기 쉬운 부분과 해결 팁','아이에게 맞는 건강 습관','함께 성장하는 관계를 위한 팁'],
   ask:['부모와 자녀의 성격 궁합','아이의 타고난 성향과 잘 맞는 대화법','부딪히기 쉬운 부분과 해결 팁','아이에게 맞는 건강 습관','함께 성장하는 관계를 위한 팁']}
 };
 let relType='lover';
@@ -630,7 +636,12 @@ $('#rel').addEventListener('click',e=>{
   $('#rel').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===bt)); relType=bt.dataset.r;
   const em=REL[relType].label.split(' ')[0];
   $('#ghP2 h4').textContent=em+' '+REL[relType].o; $('.ghsep').textContent=em; $('#nm2').placeholder=REL[relType].o;
+  $('#pcRole').style.display=relType==='child'?'flex':'none';
 });
+function setRole(v){ const C=REL.child, k=v==='child'?'C':'P'; C.o=v==='child'?'부모님':'자녀'; C.acts=C['acts'+k]; C.ask=C['ask'+k]; C.act=C['act'+k];
+  $('#pcRole').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
+  if(relType==='child'){ $('#ghP2 h4').textContent=C.label.split(' ')[0]+' '+C.o; $('#nm2').placeholder=C.o; } }
+$('#pcRole').addEventListener('click',e=>{ const bt=e.target.closest('button'); if(bt) setRole(bt.dataset.v); });
 $('#ghForm').addEventListener('click',e=>{
   const bt=e.target.closest('.pseg button');
   if(bt){ const seg=bt.parentNode, i=seg.dataset.p, k=seg.dataset.k; seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===bt)); PV[i][k]=bt.dataset.v;
