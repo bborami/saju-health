@@ -179,6 +179,7 @@
   .tme .tmeimg svg { width:100%; height:100%; }
   .tme p { margin:4px 0 0; font-size:14px; opacity:.8; }
   #toMe { margin:0 0 16px; }
+  #toGh { margin:4px 0 16px; background:#e5487a; }
   .today h4 { margin:12px 0 4px; }
   .today ul { margin:0; padding-left:20px; }
   .today .th { background:#fff; border-radius:12px; padding:10px 12px; margin-top:12px; font-size:14px; line-height:1.7; }
@@ -491,6 +492,17 @@ function showToday(m){
   b.innerHTML=CHAR(f.bi,f.se); const T=todayInfo(n); setTimeout(()=>{ b.classList.add('pop'); say('오늘은 '+T.sc+'점! '+T.title); },150);
   $('#content').scrollIntoView({behavior:'smooth'});
 }
+function goGH(){
+  const me={nm:$('#nm').value,bd:$('#bd').value,bt:$('#bt').value,g:val.g,cal:val.cal,leap:val.leap,unknown};
+  document.querySelector('.mode button[data-m=gh]').click();
+  $('#nm1').value=me.nm; $('#bd1').value=me.bd; $('#bt1').value=me.unknown?'':me.bt;
+  Object.assign(PV[1],{g:me.g,cal:me.cal,leap:me.leap,unknown:me.unknown});
+  ['g','cal','leap'].forEach(k=>$(`.pseg[data-p="1"][data-k="${k}"]`).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===me[k])));
+  $('.pseg[data-p="1"][data-k="leap"]').classList.toggle('dis',me.cal!=='lunar');
+  const sw=$('.punk[data-p="1"]'); sw.classList.toggle('on',me.unknown); $('#bt1').disabled=me.unknown;
+  $('#ghErr').textContent='💞 내 정보는 채워 두었어요. 상대방 정보만 넣어 주세요!';
+  document.querySelector('.mode').scrollIntoView({behavior:'smooth'});
+}
 function show(n, manse){
   const f=info(n), d=ILJU[n], animal=f.animal;
   if(manse!==undefined) lastManse=manse;
@@ -526,7 +538,8 @@ function show(n, manse){
      <div class="btns"><a class="aibtn gpt" id="gptBtn" target="_blank" rel="noopener">💬 ChatGPT로 묻기</a><a class="aibtn gem" id="gemBtn" href="https://gemini.google.com/app" target="_blank" rel="noopener">✨ Gemini로 묻기</a></div>
      <p class="saveMsg" id="aiMsg"></p>
      <p class="aihint">AI 답변은 참고용이에요.</p></section>`:'';
-  $('#content').innerHTML=hero+top+gw+body+save+ai+ganjiGrid();
+  $('#content').innerHTML=hero+top+gw+body+save+ai+ganjiGrid()+(mine?'<button class="go" id="toGh">💞 궁합도 보러 가볼까요?</button>':'');
+  if(mine) $('#toGh').onclick=goGH;
   if(mine){ const g=$('#gptBtn'); if(g) g.href='https://chatgpt.com/?q='+encodeURIComponent(aiPrompt()); }
   const b=$('#buddy');
   b.classList.remove('pop'); $('#bubble').classList.remove('show');
