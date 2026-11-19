@@ -360,7 +360,7 @@ function show(n, manse){
    <section class="card tip"><h3>${d.animal}의 생활 팁</h3><ul>${li(d.tips)}</ul></section>`
    :`<section class="card"><h3>🐣 ${f.animal} 캐릭터를 준비하고 있어요</h3><p style="margin:0;line-height:1.7">${n}일주의 성격과 건강 이야기는 곧 공개돼요. 지금은 60갑자표에서 계해 · 갑자 · 병오 일주를 먼저 구경해 보세요!</p></section>`;
   const gw=top?guiinCard(lastManse)+salCard(lastManse):'';
-  $('#content').innerHTML=top+gw+hero+ganjiGrid()+body;
+  $('#content').innerHTML=hero+top+gw+ganjiGrid()+body;
   const b=$('#buddy'), bu=$('#bubble');
   b.classList.remove('pop'); bu.classList.remove('show');
   if(d){ b.innerHTML=SVG[d.svg]; setTimeout(()=>{ b.classList.add('pop'); say(d.bubble); },150); }
