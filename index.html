@@ -129,6 +129,13 @@
   .oh em.lk { background:#e5484d; } .oh em.mn { background:#5b5bd6; }
   .oh .ohsub { font-family:'Jua',sans-serif; font-size:16px; margin:16px 0 0; }
   .oh .ohmany { font-size:13px; line-height:1.6; background:#eef1f6; border-radius:12px; padding:10px; margin:12px 0 0; }
+  .ai .aidesc { font-size:14px; line-height:1.6; margin:0 0 12px; }
+  .ai .aibtn { display:flex; align-items:center; justify-content:center; text-align:center; white-space:nowrap; text-decoration:none; border:0; border-radius:12px; padding:13px 6px; font-family:'Jua',sans-serif; font-size:16px; color:#fff; cursor:pointer; width:100%; }
+  .ai .aibtn.copy { background:var(--ink); margin-bottom:8px; }
+  .ai .btns { display:flex; gap:8px; } .ai .btns .aibtn { flex:1; }
+  .ai .aibtn.gpt { background:#10a37f; } .ai .aibtn.gem { background:linear-gradient(90deg,#4285f4,#9b72cb,#d96570); }
+  .ai .aihint { font-size:12px; opacity:.65; margin:8px 0 0; line-height:1.5; }
+  @media print { .ai { display:none !important; } }
   .note { font-size:12px; color:#fff; opacity:.8; text-align:center; line-height:1.6; padding:8px 12px; }
   /* 따라다니는 캐릭터 */
   #buddy { position:fixed; right:14px; bottom:18px; width:96px; height:96px; z-index:10;
@@ -377,7 +384,14 @@ function show(n, manse){
      <div class="btns"><button id="copyBtn">📋 내용 복사하기</button><button id="pdfBtn">📄 PDF로 저장하기</button></div>
      <p class="saveMsg" id="saveMsg"></p></section>`;
   const gw=top?ohCard(lastManse)+guiinCard(lastManse)+salCard(lastManse):'';
-  $('#content').innerHTML=hero+top+gw+body+save+ganjiGrid();
+  const ai=mine?`<section class="card ai"><h3>🤖 더 자세한 사주, AI에 물어보기</h3>
+     <p class="aidesc">내 만세력을 AI에게 보내 성격, 적성, 건강, 올해 운세를 더 자세히 물어볼 수 있어요. 버튼을 누르면 질문이 자동으로 복사돼요.</p>
+     <button class="aibtn copy" id="manseCopy">📋 만세력 복사하기</button>
+     <div class="btns"><a class="aibtn gpt" id="gptBtn" target="_blank" rel="noopener">💬 ChatGPT로 묻기</a><a class="aibtn gem" id="gemBtn" href="https://gemini.google.com/app" target="_blank" rel="noopener">✨ Gemini로 묻기</a></div>
+     <p class="saveMsg" id="aiMsg"></p>
+     <p class="aihint">Gemini는 창이 열리면 입력칸을 길게 눌러 <b>붙여넣기</b>만 하면 돼요. AI 답변은 참고용이에요.</p></section>`:'';
+  $('#content').innerHTML=hero+top+gw+body+save+ai+ganjiGrid();
+  if(mine){ const g=$('#gptBtn'); if(g) g.href='https://chatgpt.com/?q='+encodeURIComponent(aiPrompt()); }
   const b=$('#buddy');
   b.classList.remove('pop'); $('#bubble').classList.remove('show');
   b.innerHTML=CHAR(f.bi,f.se); setTimeout(()=>{ b.classList.add('pop'); say(d.b); },150);
@@ -402,6 +416,19 @@ function resultText(){
     '','※ 사주 명리의 오행 이론을 바탕으로 한 재미용 콘텐츠이며, 의학적 진단이나 치료를 대신하지 않습니다.');
   return L.join('\n');
 }
+function aiPrompt(){
+  const m=lastManse, oc=countOH(m).c;
+  const g=findGuiin(m).filter(x=>x.where.length).map(x=>x.n+'('+fmtW(x.where)+')');
+  const sl=findSal(m).filter(x=>x.where.length).map(x=>x.n+'('+fmtW(x.where)+')');
+  const who=m.who.replace(/^[^·]*님 · /,'');
+  return ['아래는 제 사주 만세력이에요. 명리학 관점에서 자세히 풀이해 주세요.','',
+    '[기본 정보] '+who,
+    `[만세력] 년주 ${m.year}(${toK(m.year)}) / 월주 ${m.month}(${toK(m.month)}) / 일주 ${m.day}(${toK(m.day)}) / 시주 ${m.time?m.time+'('+toK(m.time)+')':'시간 모름'}`,
+    '[오행 개수] '+Object.keys(oc).map(k=>EL[k][0]+k+' '+oc[k]).join(', '),
+    '[귀인] '+(g.join(', ')||'없음'),'[신살] '+(sl.join(', ')||'없음'),'',
+    '궁금한 것:','1. 일주와 전체 사주로 본 성격과 장단점','2. 잘 맞는 직업과 적성','3. 오행 균형으로 본 건강 관리 포인트','4. 올해와 내년의 운세 흐름','5. 대운의 큰 흐름',
+    '','쉽고 친근한 말투로, 너무 겁주지 말고 생활에 도움이 되는 조언 위주로 알려 주세요.'].join('\n');
+}
 function copyText(t){
   if(navigator.clipboard&&navigator.clipboard.writeText) return navigator.clipboard.writeText(t);
   return new Promise((ok,no)=>{ const a=document.createElement('textarea'); a.value=t; a.style.position='fixed'; a.style.opacity='0'; document.body.appendChild(a); a.select();
@@ -412,6 +439,13 @@ $('#content').addEventListener('click',e=>{
   if(e.target.closest('#copyBtn')){
     copyText(resultText()).then(()=>{ $('#saveMsg').textContent='✅ 복사됐어요! 메모장이나 카톡에 붙여넣어 보관하세요.'; say('복사 완료! 잘 보관해줘 📋'); })
       .catch(()=>{ $('#saveMsg').textContent='복사가 안 됐어요. 화면을 길게 눌러 직접 복사해 주세요.'; });
+  }
+  if(e.target.closest('#manseCopy')){
+    copyText(aiPrompt()).then(()=>{ $('#aiMsg').textContent='✅ 만세력이 복사됐어요! 원하는 AI에 붙여넣어 물어보세요.'; }).catch(()=>{ $('#aiMsg').textContent='복사가 안 됐어요. 다시 눌러 주세요.'; });
+  }
+  if(e.target.closest('#gptBtn')||e.target.closest('#gemBtn')){
+    const isG=!!e.target.closest('#gemBtn');
+    copyText(aiPrompt()).then(()=>{ $('#aiMsg').textContent=isG?'✅ 복사 완료! Gemini 입력칸에 붙여넣기 해 주세요.':'✅ 질문이 입력된 채로 ChatGPT가 열려요. 안 보이면 붙여넣기 해 주세요.'; }).catch(()=>{});
   }
   if(e.target.closest('#pdfBtn')){
     $('#saveMsg').textContent='인쇄 화면이 열리면 대상(프린터)을 "PDF로 저장"으로 골라 주세요.';
