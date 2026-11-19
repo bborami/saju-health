@@ -154,6 +154,7 @@
   .gh .score { text-align:center; font-family:'Jua',sans-serif; font-size:54px; margin:6px 0 0; color:#e5487a; }
   .gh .score small { font-size:22px; }
   .gh .tier { text-align:center; font-family:'Jua',sans-serif; font-size:20px; margin:0 0 10px; }
+  .gh .kw { text-align:center; }
   .gh .meter { height:14px; border-radius:8px; background:#f3dce4; overflow:hidden; margin:0 10px 6px; }
   .gh .meter i { display:block; height:100%; background:linear-gradient(90deg,#ff9ab8,#e5487a); border-radius:8px; }
   .ghd .pts { float:right; font-size:12px; border-radius:8px; padding:2px 8px; background:#ffe1ea; color:#c2185b; font-family:'Gowun Dodum',sans-serif; }
@@ -504,25 +505,41 @@ const REL={
   ask:['고객의 성향과 잘 맞는 소통 방식','신뢰를 쌓는 방법','주의하면 좋은 대화 포인트','고객이 관심 가질 만한 건강 포인트','오래가는 관계를 위한 팁']}
 };
 let relType='lover';
+const KW={ // [lover, friend, coworker, partner, client]
+ hap:['#운명적끌림','#첫만남부터베프','#척하면척','#환상의케미','#첫인상호감'],
+ same:['#찰떡공감','#취향일치','#말안해도통함','#같은방향','#코드일치'],
+ gen:['#서로성장','#든든한응원','#서로끌어주기','#윈윈','#믿고맡기는사이'],
+ ke:['#밀당','#자극제','#리더와서포터','#역할분담','#천천히신뢰'],
+ yukhap:['#편안함','#오래가는사이','#호흡척척','#생활리듬일치','#편안한대화'],
+ samhap:['#팀워크','#함께라면','#시너지','#목표일치','#같은꿈'],
+ sameb:['#닮은꼴','#거울같은사이','#비슷한스타일','#비슷한계산법','#통하는취향'],
+ chung:['#티격태격','#지루할틈없음','#건강한토론','#다른시각','#새로운자극'],
+ wonjin:['#표현이필요해','#작은배려','#말한마디의힘','#확인또확인','#세심한관심'],
+ mu:['#존중','#편한사이','#깔끔한관계','#신뢰기반','#부담없는사이'],
+ fill:['#서로의빈자리','#서로채움','#보완관계','#부족함을채워','#딱필요한사람'],
+ rel:['#설렘','#우정','#협업','#시너지','#신뢰']
+};
+const RIDX={lover:0,friend:1,coworker:2,partner:3,client:4};
 function gunghap(A,B){
   const a=toK(A.day), b=toK(B.day), an=A.nm||'나', bn=B.nm||'상대방';
   const as=STEM.indexOf(a[0]), bs=STEM.indexOf(b[0]), ae=STEME[as], be=STEME[bs];
   const out=[]; let sc=55;
   // 일간
-  if(Math.abs(as-bs)===5){ sc+=25; out.push({t:'💞 일간: 천간합',p:25,d:`두 사람의 일간(${a[0]}·${b[0]})이 서로 끌어당기는 '합' 관계예요. 처음 만났을 때부터 묘하게 끌리고, 함께 있으면 자연스럽게 하나가 되는 환상의 조합이에요.`}); }
-  else if(ae===be){ sc+=12; out.push({t:'🤝 일간: 같은 기운',p:12,d:`둘 다 ${ELN[ae]}(${ae}) 기운이라 친구 같은 사이예요. 말하지 않아도 통하고 취향이 비슷해요. 다만 둘 다 고집을 부리면 한 사람이 먼저 양보해 주세요.`}); }
-  else if(GEN[ae]===be||GEN[be]===ae){ sc+=18; const [g,r,gn,rn]=GEN[ae]===be?[ae,be,an,bn]:[be,ae,bn,an];
+  let c1,c2;
+  if(Math.abs(as-bs)===5){ c1='hap'; sc+=25; out.push({t:'💞 일간: 천간합',p:25,d:`두 사람의 일간(${a[0]}·${b[0]})이 서로 끌어당기는 '합' 관계예요. 처음 만났을 때부터 묘하게 끌리고, 함께 있으면 자연스럽게 하나가 되는 환상의 조합이에요.`}); }
+  else if(ae===be){ c1='same'; sc+=12; out.push({t:'🤝 일간: 같은 기운',p:12,d:`둘 다 ${ELN[ae]}(${ae}) 기운이라 친구 같은 사이예요. 말하지 않아도 통하고 취향이 비슷해요. 다만 둘 다 고집을 부리면 한 사람이 먼저 양보해 주세요.`}); }
+  else if(GEN[ae]===be||GEN[be]===ae){ c1='gen'; sc+=18; const [g,r,gn,rn]=GEN[ae]===be?[ae,be,an,bn]:[be,ae,bn,an];
     out.push({t:'🌱 일간: 상생',p:18,d:`${gn}님의 ${ELN[g]} 기운이 ${rn}님의 ${ELN[r]} 기운을 살려주는 '상생' 관계예요. ${gn}님이 챙겨주고 ${rn}님이 힘을 얻는, 서로를 성장시키는 조합이에요.`}); }
-  else { sc+=5; const [k,r,kn,rn]=KE[ae]===be?[ae,be,an,bn]:[be,ae,bn,an];
+  else { c1='ke'; sc+=5; const [k,r,kn,rn]=KE[ae]===be?[ae,be,an,bn]:[be,ae,bn,an];
     out.push({t:'⚡ 일간: 상극',p:5,d:`${kn}님의 ${ELN[k]} 기운이 ${rn}님의 ${ELN[r]} 기운을 다스리는 관계예요. ${kn}님이 리드하고 ${rn}님이 맞춰가는 구조라, 서로 배려하면 든든한 사이가 돼요. 잔소리는 조금만 줄여 주세요!`}); }
   // 일지
   const ab=a[1], bb=b[1], ai=BR.indexOf(ab), bi=BR.indexOf(bb);
-  if(pairIn(YUKHAP,ab,bb)){ sc+=20; out.push({t:'🏡 일지: 육합',p:20,d:`일지(${ab}·${bb})가 육합이라 생활 리듬과 속마음이 잘 맞아요. 함께 지낼수록 더 편해지는 사이예요.`}); }
-  else if(ab!==bb&&ai%4===bi%4){ sc+=15; out.push({t:'🎯 일지: 삼합',p:15,d:`일지(${ab}·${bb})가 삼합이라 같은 목표를 향해 힘을 모으면 시너지가 커지는 팀워크 좋은 사이예요.`}); }
-  else if(ab===bb){ sc+=8; out.push({t:'🪞 일지: 같은 자리',p:8,d:`일지가 같아(${ab}) 닮은 점이 많아요. 편안하지만 가끔은 새로운 자극을 함께 찾아 보세요.`}); }
-  else if(Math.abs(ai-bi)===6){ sc-=8; out.push({t:'🔥 일지: 충',p:-8,d:`일지(${ab}·${bb})가 '충' 관계라 티격태격할 수 있어요. 대신 서로에게 자극이 되어 지루할 틈이 없어요. 부딪힌 날은 그날 바로 푸는 규칙을 만들어 보세요.`}); }
-  else if(pairIn(WONJIN,ab,bb)){ sc-=5; out.push({t:'🌧️ 일지: 원진',p:-5,d:`일지(${ab}·${bb})가 원진이라 가끔 이유 없이 서운할 수 있어요. 작은 표현과 고맙다는 말이 특효약이에요.`}); }
-  else { sc+=5; out.push({t:'🙂 일지: 무난',p:5,d:`일지(${ab}·${bb})는 무난한 관계예요. 큰 부딪힘 없이 서로의 영역을 존중하는 편안한 사이예요.`}); }
+  if(pairIn(YUKHAP,ab,bb)){ c2='yukhap'; sc+=20; out.push({t:'🏡 일지: 육합',p:20,d:`일지(${ab}·${bb})가 육합이라 생활 리듬과 속마음이 잘 맞아요. 함께 지낼수록 더 편해지는 사이예요.`}); }
+  else if(ab!==bb&&ai%4===bi%4){ c2='samhap'; sc+=15; out.push({t:'🎯 일지: 삼합',p:15,d:`일지(${ab}·${bb})가 삼합이라 같은 목표를 향해 힘을 모으면 시너지가 커지는 팀워크 좋은 사이예요.`}); }
+  else if(ab===bb){ c2='sameb'; sc+=8; out.push({t:'🪞 일지: 같은 자리',p:8,d:`일지가 같아(${ab}) 닮은 점이 많아요. 편안하지만 가끔은 새로운 자극을 함께 찾아 보세요.`}); }
+  else if(Math.abs(ai-bi)===6){ c2='chung'; sc-=8; out.push({t:'🔥 일지: 충',p:-8,d:`일지(${ab}·${bb})가 '충' 관계라 티격태격할 수 있어요. 대신 서로에게 자극이 되어 지루할 틈이 없어요. 부딪힌 날은 그날 바로 푸는 규칙을 만들어 보세요.`}); }
+  else if(pairIn(WONJIN,ab,bb)){ c2='wonjin'; sc-=5; out.push({t:'🌧️ 일지: 원진',p:-5,d:`일지(${ab}·${bb})가 원진이라 가끔 이유 없이 서운할 수 있어요. 작은 표현과 고맙다는 말이 특효약이에요.`}); }
+  else { c2='mu'; sc+=5; out.push({t:'🙂 일지: 무난',p:5,d:`일지(${ab}·${bb})는 무난한 관계예요. 큰 부딪힘 없이 서로의 영역을 존중하는 편안한 사이예요.`}); }
   // 띠
   const ay=toK(A.year)[1], by=toK(B.year)[1], ayi=BR.indexOf(ay), byi=BR.indexOf(by);
   if(pairIn(YUKHAP,ay,by)||(ay!==by&&ayi%4===byi%4)){ sc+=5; out.push({t:'🐾 띠 궁합',p:5,d:`${ANIMAL[ayi]}띠와 ${ANIMAL[byi]}띠는 서로 잘 맞는 띠 궁합이에요.`}); }
@@ -537,7 +554,8 @@ function gunghap(A,B){
   const sum={}; Object.keys(ca).forEach(k=>sum[k]=ca[k]+cb[k]);
   const low=Object.keys(sum).sort((x,y)=>sum[x]-sum[y])[0];
   const R=REL[relType], tier=R.tiers[sc>=90?0:sc>=80?1:sc>=70?2:3];
-  return {sc,tier,out,an,bn,a,b,low,sum,ae,be,R};
+  const ri=RIDX[relType], kw=[KW[c1][ri],KW[c2][ri],KW[fill.length?'fill':'rel'][ri]];
+  return {sc,tier,out,an,bn,a,b,low,sum,ae,be,R,kw};
 }
 function ghPrompt(A,B,G){
   const line=(M,n)=>`${n}: ${M.who.replace(/^[^·]*님 · /,'')} / 년주 ${M.year} 월주 ${M.month} 일주 ${M.day} 시주 ${M.time||'모름'}`;
@@ -554,7 +572,7 @@ function showGH(A,B){
   const sec=G.out.map(o=>`<div class="item"><h4>${o.t}<span class="pts">${o.p>0?'+':''}${o.p}</span></h4><p>${o.d}</p></div>`).join('');
   $('#content').innerHTML=`<section class="card gh"><h3>${G.R.label} 궁합</h3>
      <div class="pair"><div class="pc"><div>${CHAR(fa.bi,fa.se)}</div>${G.an}<br><small>${G.a}일주</small></div><span class="hrt">${G.R.label.split(' ')[0]}</span><div class="pc"><div>${CHAR(fb.bi,fb.se)}</div>${G.bn}<br><small>${G.b}일주</small></div></div>
-     <p class="score">${G.sc}<small>점</small></p><div class="meter"><i style="width:${G.sc}%"></i></div><p class="tier">${G.tier}</p></section>
+     <p class="score">${G.sc}<small>점</small></p><div class="meter"><i style="width:${G.sc}%"></i></div><p class="tier">${G.tier}</p><div class="kw">${G.kw.map(k=>`<span class="tag">${k}</span>`).join('')}</div></section>
    <section class="card gw ghd"><h3>🔍 궁합 풀이</h3>${sec}</section>
    <section class="card gw"><h3>🌿 두 사람이 챙기면 좋은 건강</h3>
      <div class="item"><h4>두 사람 모두 ${ELN[G.low]}(${G.low}) 기운이 적은 편이에요</h4><p>🩺 함께 챙길 곳: ${OH[G.low].organ}<br>🥗 같이 먹으면 좋은 음식: ${OH[G.low].food}<br>🚶 같이 하면 좋은 습관: ${OH[G.low].act}</p></div>
@@ -574,7 +592,7 @@ function showGH(A,B){
 }
 function ghText(){
   const {A,B,G}=GH, L=[`[일주로 보는 나의 사주 · ${G.R.label.slice(2).trim()} 궁합]`,''];
-  L.push(`${G.an} (${A.who.replace(/^[^·]*님 · /,'')}) · ${G.a}일주`,`${G.bn} (${B.who.replace(/^[^·]*님 · /,'')}) · ${G.b}일주`,'',`궁합 점수: ${G.sc}점 ${G.tier}`,'');
+  L.push(`${G.an} (${A.who.replace(/^[^·]*님 · /,'')}) · ${G.a}일주`,`${G.bn} (${B.who.replace(/^[^·]*님 · /,'')}) · ${G.b}일주`,'',`궁합 점수: ${G.sc}점 ${G.tier}`,'관계 키워드: '+G.kw.join(' '),'');
   G.out.forEach(o=>L.push(`■ ${o.t} (${o.p>0?'+':''}${o.p})`,o.d,''));
   L.push(`■ ${G.R.act.slice(2).trim()}: `+[...new Set([G.ae,G.be,G.low])].filter(k=>G.R.acts[k]).map(k=>G.R.acts[k]).join(' / '),`■ 두 사람이 챙기면 좋은 건강: ${ELN[G.low]} 기운 보충 - ${OH[G.low].food} / ${OH[G.low].act}`,'','※ 사주 명리 이론을 바탕으로 한 재미용 콘텐츠입니다.');
   return L.join('\n');
