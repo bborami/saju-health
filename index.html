@@ -183,6 +183,7 @@
   .today h4 { margin:12px 0 4px; }
   .today ul { margin:0; padding-left:20px; }
   .today .th { background:#fff; border-radius:12px; padding:10px 12px; margin-top:12px; font-size:14px; line-height:1.7; }
+  .gh .ghsum { text-align:center; font-size:15px; line-height:1.6; margin:12px 4px 0; }
   .gh .meter { height:14px; border-radius:8px; background:#f3dce4; overflow:hidden; margin:0 10px 6px; }
   .gh .meter i { display:block; height:100%; background:linear-gradient(90deg,#ff9ab8,#e5487a); border-radius:8px; }
   .ghd .pts { float:right; font-size:12px; border-radius:8px; padding:2px 8px; background:#ffe1ea; color:#c2185b; font-family:'Gowun Dodum',sans-serif; }
@@ -737,7 +738,7 @@ function gunghap(A,B){
   const low=Object.keys(sum).sort((x,y)=>sum[x]-sum[y])[0];
   const R=REL[relType], tier=R.tiers[sc>=90?0:sc>=80?1:sc>=70?2:3];
   const ri=RIDX[relType], kw=[KW[c1][ri],KW[c2][ri],KW[fill.length?'fill':'rel'][ri]];
-  return {sc,tier,out,an,bn,a,b,low,sum,ae,be,R,kw};
+  return {sc,tier,out,an,bn,a,b,low,sum,ae,be,R,kw,c1,c2};
 }
 function ghPrompt(A,B,G){
   const line=(M,n)=>`${n}: ${M.who.replace(/^[^·]*님 · /,'')} / 년주 ${M.year} 월주 ${M.month} 일주 ${M.day} 시주 ${M.time||'모름'}`;
@@ -747,18 +748,45 @@ function ghPrompt(A,B,G){
    '','쉽고 따뜻한 말투로, 겁주지 말고 관계에 도움이 되는 조언 위주로 알려 주세요.'].join('\n');
 }
 let GH=null;
+const GSTYLE={목:{s:'새로운 걸 먼저 시작하는',w:'마음이 급해 밀어붙일 때가 있는'},화:{s:'분위기를 환하게 밝히는',w:'감정이 금방 끓어오르는'},토:{s:'든든하게 받쳐주는',w:'변화를 조금 귀찮아하는'},금:{s:'깔끔하게 정리하고 결정하는',w:'말이 가끔 날카롭게 들리는'},수:{s:'깊이 생각하고 마음을 읽는',w:'속마음을 잘 안 꺼내는'}};
+const GHEAR={목:'"네 덕분에 시작할 용기가 났어"',화:'"역시 너밖에 없어!"',토:'"늘 곁에 있어 줘서 고마워"',금:'"네 말이 맞았어, 정리해 줘서 고마워"',수:'"말 안 해도 네 마음 알아"'};
+const GSUM=['말하지 않아도 통하는 사이예요. 함께 있으면 서로에게 행운을 불러오는 조합이에요.','기본 궁합이 좋은 사이예요. 작은 배려만 더하면 오래오래 든든한 관계가 돼요.','편안하게 어울리는 사이예요. 서로 다른 점을 재미로 받아들이면 더 가까워져요.','처음엔 다르게 느껴져도 알아갈수록 빛나는 사이예요. 대화가 가장 좋은 약이에요.'];
+const GGOOD={hap:'일간이 합이라 함께 있으면 서로의 장점이 더 커져요',same:'생각하는 방식이 비슷해 결정이 빠르고 손발이 잘 맞아요',gen:'한 사람이 힘을 주고 한 사람이 힘을 받아, 함께할수록 둘 다 성장해요',ke:'서로 다른 성향이 오히려 균형을 잡아줘서 한쪽으로 치우치지 않아요'};
+const GFIX={hap:'너무 붙어 있으면 각자 시간이 부족해질 수 있어요. 혼자만의 시간도 존중해 주세요',same:'둘 다 고집을 부리면 평행선이 돼요. 결정권을 번갈아 가져 보세요',gen:'한쪽만 주는 관계가 되지 않게, 받은 만큼 고맙다는 말을 꼭 해 주세요',ke:'상대를 바꾸려 하기보다 "그럴 수 있지" 한마디가 특효약이에요'};
+const GB_GOOD={yukhap:'일지가 육합이라 생활 리듬이 잘 맞아 같이 있을 때 편해요',samhap:'일지가 삼합이라 같은 목표가 생기면 시너지가 폭발해요',sameb:'일지가 같아 취향과 생활 습관이 닮았어요',mu:'일지가 무난해서 서로의 영역을 존중하는 깔끔한 사이예요'};
+const GB_FIX={chung:'일지가 충이라 의견이 부딪히는 날이 있어요. 다툰 날은 그날 바로 푸는 규칙을 만들어 보세요',wonjin:'일지가 원진이라 괜히 서운한 날이 있어요. 작은 표현을 자주 해 주세요',sameb:'너무 닮아서 같은 데서 막힐 수 있어요. 가끔은 서로 다른 역할을 맡아 보세요'};
+function seaOf(M){ const b=toK(M.month)[1]; return '인묘진'.includes(b)?0:'사오미'.includes(b)?1:'신유술'.includes(b)?2:3; }
+function eun(w){ const c=w.charCodeAt(w.length-1); return w+((c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28)?'은':'는'); }
+function ghMore(A,B,G){
+  const N1=G.an==='나'?'나':G.an+'님', N2=(G.bn==='상대방'||G.bn===G.R.o)?G.R.o:G.bn+'님';
+  const S1=GSTYLE[G.ae], S2=GSTYLE[G.be];
+  const good=[`${eun(N1)} ${S1.s} 사람, ${eun(N2)} ${S2.s} 사람이에요`, GGOOD[G.c1]];
+  if(GB_GOOD[G.c2]) good.push(GB_GOOD[G.c2]);
+  const care=[`${eun(N1)} ${S1.w} 편, ${eun(N2)} ${S2.w} 편이라 이 부분은 서로 이해해 주세요`, GFIX[G.c1]];
+  if(GB_FIX[G.c2]) care.push(GB_FIX[G.c2]);
+  const SN=['🌸 봄','☀️ 여름','🍂 가을','❄️ 겨울'], sa=seaOf(A), sb=seaOf(B), d=Math.abs(sa-sb);
+  const seaTxt=d===0?'같은 계절에 태어나 컨디션 리듬이 비슷해요. 지치는 시기도 비슷하니 서로 챙겨 주세요.':d===2?'정반대 계절에 태어나 서로에게 없는 매력을 가졌어요. 그래서 더 끌리고 배울 게 많아요.':'이어지는 계절에 태어나 자연스럽게 바통을 주고받는 사이예요. 한 사람이 지칠 때 다른 사람이 힘을 내요.';
+  const sum=GSUM[G.sc>=90?0:G.sc>=80?1:G.sc>=70?2:3];
+  return {sum, good, care, sea:`${SN[sa]} × ${SN[sb]}`, seaTxt, h1:`${N1} → ${N2}에게`, w1:GHEAR[G.be], h2:`${N2} → ${N1}에게`, w2:GHEAR[G.ae], lucky:OH[G.low].color};
+}
 function showGH(A,B){
-  const G=gunghap(A,B), fa=info(G.a), fb=info(G.b), da=ILJU[G.a], db=ILJU[G.b];
+  const G=gunghap(A,B), fa=info(G.a), fb=info(G.b), da=ILJU[G.a], db=ILJU[G.b], X=ghMore(A,B,G);
   GH={A,B,G};
   applyTheme({bg1:'#4a1530',bg2:'#d9607f',accent:'#ffc2d4',fx:'drop'});
   const sec=G.out.map(o=>`<div class="item"><h4>${o.t}</h4><p>${o.d}</p></div>`).join('');
   $('#content').innerHTML=`<section class="card gh"><h3>${G.R.label} 궁합</h3>
      <div class="pair"><div class="pc"><div>${CHAR(fa.bi,fa.se)}</div>${G.an}<br><small>${G.a}일주</small></div><span class="hrt">${G.R.label.split(' ')[0]}</span><div class="pc"><div>${CHAR(fb.bi,fb.se)}</div>${G.bn}<br><small>${G.b}일주</small></div></div>
-     <p class="score">${G.sc}<small>점</small></p><div class="meter"><i style="width:${G.sc}%"></i></div><p class="tier">${G.tier}</p><div class="kw">${G.kw.map(k=>`<span class="tag">${k}</span>`).join('')}</div></section>
+     <p class="score">${G.sc}<small>점</small></p><div class="meter"><i style="width:${G.sc}%"></i></div><p class="tier">${G.tier}</p><div class="kw">${G.kw.map(k=>`<span class="tag">${k}</span>`).join('')}</div><p class="ghsum">${X.sum}</p></section>
+   <section class="card gw"><h3>💗 두 사람은 이런 사이</h3>
+     <div class="item"><h4>✨ 잘 맞는 점</h4><p>${X.good.map(x=>'· '+x).join('<br>')}</p></div>
+     <div class="item"><h4>⚠️ 잘 안 맞는 점과 해결 팁</h4><p>${X.care.map(x=>'· '+x).join('<br>')}</p></div>
+     <div class="item"><h4>🗓️ 태어난 계절: ${X.sea}</h4><p>${X.seaTxt}</p></div></section>
    <section class="card gw ghd"><h3>🔍 궁합 풀이</h3>${sec}</section>
    <section class="card gw"><h3>🌿 두 사람이 챙기면 좋은 건강</h3>
      <div class="item"><h4>두 사람 모두 ${ELN[G.low]}(${G.low}) 기운이 적은 편이에요</h4><p>🩺 함께 챙길 곳: ${OH[G.low].organ}<br>🥗 같이 먹으면 좋은 음식: ${OH[G.low].food}<br>🚶 같이 하면 좋은 습관: ${OH[G.low].act}</p></div>
-     <div class="item"><h4>${G.R.act}</h4><p>${tipList(G).map(t=>'· '+(t[0]?'<b>'+t[0]+'</b> ':'')+t[1]).join('<br>')}</p></div></section>
+     <div class="item"><h4>${G.R.act}</h4><p>${tipList(G).map(t=>'· '+(t[0]?'<b>'+t[0]+'</b> ':'')+t[1]).join('<br>')}</p></div>
+     <div class="item"><h4>💬 마음을 여는 말 한마디</h4><p>· <b>${X.h1}:</b> ${X.w1}<br>· <b>${X.h2}:</b> ${X.w2}</p></div>
+     <div class="item"><h4>🍀 함께하면 좋은 행운의 색</h4><p>${X.lucky}. 같이 쓰는 물건이나 옷에 이 색을 더해 보세요.</p></div></section>
    <section class="card gw"><h3>🐾 두 사람의 일주</h3>
      <div class="item"><h4>${G.an} · ${G.a}일주 ${fa.animal}</h4><p>“${da.o}”</p></div>
      <div class="item"><h4>${G.bn} · ${G.b}일주 ${fb.animal}</h4><p>“${db.o}”</p></div></section>
@@ -775,8 +803,9 @@ function showGH(A,B){
 function ghText(){
   const {A,B,G}=GH, L=[`[일주로 보는 나의 사주 · ${G.R.label.slice(2).trim()} 궁합]`,''];
   L.push(`${G.an} (${A.who.replace(/^[^·]*님 · /,'')}) · ${G.a}일주`,`${G.bn} (${B.who.replace(/^[^·]*님 · /,'')}) · ${G.b}일주`,'',`궁합 점수: ${G.sc}점 ${G.tier}`,'관계 키워드: '+G.kw.join(' '),'');
+  const X=ghMore(A,B,G); L.push(X.sum,'','■ 잘 맞는 점',...X.good.map(x=>'· '+x),'','■ 잘 안 맞는 점과 해결 팁',...X.care.map(x=>'· '+x),'',`■ 태어난 계절: ${X.sea}`,X.seaTxt,'');
   G.out.forEach(o=>L.push(`■ ${o.t}`,o.d,''));
-  L.push(`■ ${G.R.act.slice(2).trim()}: `+tipList(G).map(t=>(t[0]?t[0]+' ':'')+t[1]).join(' / '),`■ 두 사람이 챙기면 좋은 건강: ${ELN[G.low]} 기운 보충 - ${OH[G.low].food} / ${OH[G.low].act}`,'','※ 사주 명리 이론을 바탕으로 한 재미용 콘텐츠입니다.');
+  L.push(`■ ${G.R.act.slice(2).trim()}: `+tipList(G).map(t=>(t[0]?t[0]+' ':'')+t[1]).join(' / '),`■ 두 사람이 챙기면 좋은 건강: ${ELN[G.low]} 기운 보충 - ${OH[G.low].food} / ${OH[G.low].act}`,`■ 마음을 여는 말: ${X.h1} ${X.w1} / ${X.h2} ${X.w2}`,`■ 함께하면 좋은 행운의 색: ${X.lucky}`,'','※ 사주 명리 이론을 바탕으로 한 재미용 콘텐츠입니다.');
   return L.join('\n');
 }
 $('#content').addEventListener('click',e=>{
